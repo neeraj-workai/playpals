@@ -14,23 +14,28 @@ import { FONT_DISPLAY, FONT_BODY, INK, INK_DIM, BLOB_RADIUS, cssGradient, P2_RAM
 export class PassPlayScene extends Phaser.Scene {
   private root?: HTMLDivElement;
   private gameKey = '';
+  private player1Id = 'main';
   private player2Id = '';
 
   constructor() {
     super('PassPlay');
   }
 
-  init(data: { key?: string; player2Id?: string }): void {
+  init(data: { key?: string; player1Id?: string; player2Id?: string }): void {
     this.gameKey = data?.key ?? GAMES[0].key;
+    this.player1Id = data?.player1Id ?? 'main';
     this.player2Id = data?.player2Id ?? '';
   }
 
   create(): void {
     ensureSoleActiveScene(this);
     const def = GAMES.find((g) => g.key === this.gameKey) ?? GAMES[0];
-    const pal = Profile.pal();
-    const name = Profile.name();
-    const avatar = AVATARS[Profile.get()?.avatarIdx ?? 0];
+
+    // Resolve Player 1 — family member if selected, else main profile
+    const p1Member = this.player1Id !== 'main' ? FamilyProfiles.getById(this.player1Id) : undefined;
+    const pal = p1Member ? PALETTE[p1Member.colorIdx] : Profile.pal();
+    const name = p1Member ? p1Member.name : Profile.name();
+    const avatar = p1Member ? AVATARS[p1Member.avatarIdx] : AVATARS[Profile.get()?.avatarIdx ?? 0];
 
     // Resolve Player 2 info — real family member or anonymous
     const p2Member = this.player2Id ? FamilyProfiles.getById(this.player2Id) : undefined;
