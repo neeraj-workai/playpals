@@ -5,6 +5,18 @@ Format: `[version] — YYYY-MM-DD HH:MM`
 
 ---
 
+## [Unreleased — v0.6] — 2026-06-22 23:30
+
+### Bug Fixes
+- **Top space on mobile** — Canvas was centred vertically inside the viewport, leaving dead space above and below due to aspect-ratio mismatch. Fixed by pinning the canvas to the top (`align-items: flex-start`) and switching to `100dvh` (dynamic viewport height) so the browser address bar is excluded.
+- **Word Scramble P2 answer fill order** — P2's answer slots were filling left-to-right in screen coordinates (= right-to-left from P2's rotated view). Fixed to fill right-to-left on screen so letters appear in left-to-right order from P2's perspective.
+
+### Removed
+- **Trail Clash** — removed from hub and scene list.
+- **Bomb Diffuse** — removed from hub and scene list. (Total game count: 16 → 18 remaining.)
+
+---
+
 ## [Unreleased — v0.5] — 2026-06-22 22:54
 
 ### Bug Fixes

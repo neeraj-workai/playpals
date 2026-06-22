@@ -148,17 +148,6 @@ export const GAMES: GameDef[] = [
     ],
   },
   {
-    key: 'trail', title: 'Trail Clash', blurb: 'Survive the trail', scene: 'Trail', icon: '🐍',
-    grad: g(0x6fe0e8, 0x14b8c4), cssGrad: cg('#6FE0E8', '#14B8C4'),
-    tint: '#E4F8FA', tintHex: 0xe4f8fa, accentHex: 0x14b8c4,
-    time: '2 min', diff: 'Medium',
-    howto: [
-      { n: 1, t: 'Tap your side to turn left or right' },
-      { n: 2, t: "Don't crash into a wall or trail" },
-      { n: 3, t: 'Outlast your rival to win' },
-    ],
-  },
-  {
     key: 'memory', title: 'Memory Match', blurb: 'Find the pairs', scene: 'Memory', icon: '🧠',
     grad: g(0xffb6cf, 0xff8fb1), cssGrad: cg('#FFB6CF', '#FF8FB1'),
     tint: '#FFEBF2', tintHex: 0xffebf2, accentHex: 0xff8fb1,
@@ -288,17 +277,6 @@ export const GAMES: GameDef[] = [
       { n: 1, t: 'Drag your paddle to hit the ball' },
       { n: 2, t: 'Gravity flips direction every 5 seconds' },
       { n: 3, t: 'First to 7 points wins' },
-    ],
-  },
-  {
-    key: 'bombdiffuse', title: 'Bomb Diffuse', blurb: 'Co-op countdown', scene: 'BombDiffuse', icon: '💣',
-    grad: g(0xfca5a5, 0xdc2626), cssGrad: cg('#FCA5A5', '#DC2626'),
-    tint: '#FEE2E2', tintHex: 0xfee2e2, accentHex: 0xdc2626,
-    time: '2 min', diff: 'Easy',
-    howto: [
-      { n: 1, t: 'Each player sees half the secret code' },
-      { n: 2, t: 'Tap your digits in order together' },
-      { n: 3, t: 'Defuse 3 bombs before the timer runs out' },
     ],
   },
   {
