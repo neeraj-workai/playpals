@@ -40,7 +40,7 @@ export class TapRaceScene extends Phaser.Scene {
     this.p1 = 0;
     this.p2 = 0;
     this.over = false;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x3d2000); // dark orange
 
     // top half (P2/CPU)
     this.add.rectangle(GAME_WIDTH / 2, (70 + MID) / 2, GAME_WIDTH, MID - 70, COLORS.p2, 0.12);

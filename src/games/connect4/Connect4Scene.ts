@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -39,7 +39,7 @@ export class Connect4Scene extends Phaser.Scene {
     this.over = false;
     this.locked = false;
 
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x3d0b0b); // dark red
     addBackButton(this, () => this.toHub(false));
     this.status = this.add
       .text(GAME_WIDTH / 2, 150, '', { fontFamily: 'Arial Black, Arial', fontSize: '22px', color: '#ffffff' })
@@ -182,7 +182,7 @@ export class Connect4Scene extends Phaser.Scene {
     if (this.over) return;
     const color = this.current === 1 ? COLORS.p1 : COLORS.p2;
     let label: string;
-    if (this.mode === 'ai') label = this.current === 1 ? 'Your turn' : 'CPU thinking…';
+    if (this.mode === 'ai') label = this.current === 1 ? 'Your turn' : 'CPU thinkingâ€¦';
     else label = this.current === 1 ? 'P1 turn' : 'P2 turn';
     this.status.setText(label).setColor('#' + color.toString(16).padStart(6, '0'));
   }
@@ -227,3 +227,4 @@ export class Connect4Scene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

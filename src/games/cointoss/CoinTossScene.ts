@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -43,7 +43,7 @@ export class CoinTossScene extends Phaser.Scene {
     setupSceneScale(this);
     this.current = 1; this.p1 = 0; this.p2 = 0;
     this.over = false; this.locked = false;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x242000); // dark gold
 
     addBackButton(this, () => this.toHub(false));
 
@@ -54,7 +54,7 @@ export class CoinTossScene extends Phaser.Scene {
 
     this.turnText = this.add.text(CX, 120, '', { fontFamily: 'Arial Black, Arial', fontSize: '19px', color: '#ffffff' }).setOrigin(0.5);
 
-    // Coin drawn as Phaser Arc (no emoji — reliable on all Android versions)
+    // Coin drawn as Phaser Arc (no emoji â€” reliable on all Android versions)
     this.coinCircle = this.add.arc(CX, CY, COIN_R, 0, 360, false, 0xFFD700).setDepth(2);
     this.coinRim    = this.add.arc(CX, CY, COIN_R - 7, 0, 360, false, 0xE8B400).setDepth(3);
     this.coinLabel  = this.add.text(CX, CY, '?', {
@@ -92,8 +92,8 @@ export class CoinTossScene extends Phaser.Scene {
     if (this.over) return;
     this.locked = false;
     const label = this.mode === 'ai'
-      ? (this.current === 1 ? 'Your call — heads or tails?' : 'CPU calling…')
-      : `P${this.current} — call it`;
+      ? (this.current === 1 ? 'Your call â€” heads or tails?' : 'CPU callingâ€¦')
+      : `P${this.current} â€” call it`;
     const color = this.current === 1 ? '#' + COLORS.p1.toString(16) : '#' + COLORS.p2.toString(16);
     this.turnText.setText(label).setColor(color);
     this.resultText.setText('');
@@ -133,10 +133,10 @@ export class CoinTossScene extends Phaser.Scene {
       this.p1Text.setText(String(this.p1));
       this.p2Text.setText(String(this.p2));
       audio.goal();
-      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} — correct! ✓`);
+      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} â€” correct! âœ“`);
     } else {
       audio.bump();
-      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} — nope!`);
+      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} â€” nope!`);
     }
     if (this.p1 >= TARGET || this.p2 >= TARGET) {
       this.time.delayedCall(900, () => this.endMatch());
@@ -159,7 +159,7 @@ export class CoinTossScene extends Phaser.Scene {
     }
     showResult(this, {
       title,
-      subtitle: `${this.p1} – ${this.p2}`,
+      subtitle: `${this.p1} â€“ ${this.p2}`,
       onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
       onHome: () => this.toHub(true),
     });
@@ -170,3 +170,4 @@ export class CoinTossScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

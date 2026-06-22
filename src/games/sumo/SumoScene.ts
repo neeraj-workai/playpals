@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -47,7 +47,7 @@ export class SumoScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.locked = false;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x1c0e4a); // dark purple
 
     this.add.circle(CX, CY, RING, COLORS.panelLight, 1).setStrokeStyle(5, 0x4b5a7a, 1);
     this.add.circle(CX, CY, RING - 26, 0x000000, 0).setStrokeStyle(2, 0x3a4767, 1);
@@ -162,7 +162,7 @@ export class SumoScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        subtitle: `${this.p1} – ${this.p2}`,
+        subtitle: `${this.p1} â€“ ${this.p2}`,
         onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
         onHome: () => this.toHub(true),
       }),
@@ -174,3 +174,4 @@ export class SumoScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

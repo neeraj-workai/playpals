@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -46,7 +46,7 @@ export class HotPotatoScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.locked = true;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x3d3000); // dark yellow
 
     this.add.rectangle(GAME_WIDTH / 2, (64 + MID_Y) / 2, GAME_WIDTH, MID_Y - 64, COLORS.p2, 0.12);
     this.add.rectangle(GAME_WIDTH / 2, (MID_Y + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - MID_Y, COLORS.p1, 0.12);
@@ -59,7 +59,7 @@ export class HotPotatoScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 58, 'P1', { fontFamily: 'Arial', fontSize: '12px', color: COLORS.inkDim }).setOrigin(0.5);
 
     this.status = this.add.text(GAME_WIDTH / 2, MID_Y, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5).setDepth(20);
-    this.bomb = this.add.text(GAME_WIDTH / 2, BOT_Y, '🧨', { fontSize: '60px' }).setOrigin(0.5).setDepth(10);
+    this.bomb = this.add.text(GAME_WIDTH / 2, BOT_Y, 'ðŸ§¨', { fontSize: '60px' }).setOrigin(0.5).setDepth(10);
 
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
       if (this.over || this.locked || this.traveling || p.worldY < 70) return;
@@ -136,7 +136,7 @@ export class HotPotatoScene extends Phaser.Scene {
 
     audio.bump();
     this.cameras.main.shake(250, 0.018);
-    const boom = this.add.text(this.bomb.x, this.bomb.y, '💥', { fontSize: '80px' }).setOrigin(0.5).setDepth(15);
+    const boom = this.add.text(this.bomb.x, this.bomb.y, 'ðŸ’¥', { fontSize: '80px' }).setOrigin(0.5).setDepth(15);
     this.bomb.setVisible(false);
     this.time.delayedCall(500, () => boom.destroy());
 
@@ -165,7 +165,7 @@ export class HotPotatoScene extends Phaser.Scene {
     showResult(this, {
       title,
       titleColor: color,
-      subtitle: `${this.p1} – ${this.p2}`,
+      subtitle: `${this.p1} â€“ ${this.p2}`,
       onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
       onHome: () => this.toHub(true),
     });
@@ -176,3 +176,4 @@ export class HotPotatoScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

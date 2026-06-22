@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -47,7 +47,7 @@ export class AirHockeyScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.locked = false;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x0f2d52); // dark blue
     this.input.addPointer(2);
 
     // rink markings
@@ -79,7 +79,7 @@ export class AirHockeyScene extends Phaser.Scene {
     this.physics.add.collider(this.puck, this.pad1, () => this.hit(this.pad1));
     this.physics.add.collider(this.puck, this.pad2, () => this.hit(this.pad2));
 
-    // Paddle follows the pointer — moving the mouse (no click needed) or a
+    // Paddle follows the pointer â€” moving the mouse (no click needed) or a
     // finger drags the paddle. pointermove fires per-pointer, so two fingers
     // in 2P each control their own half.
     this.input.on('pointermove', this.onPointer, this);
@@ -161,7 +161,7 @@ export class AirHockeyScene extends Phaser.Scene {
   }
 
   private aiMove(delta: number): void {
-    const step = 0.26 * delta; // ~260 px/s — beatable
+    const step = 0.26 * delta; // ~260 px/s â€” beatable
     let tx = this.puck.x;
     let ty: number;
     if (this.puck.y < this.midY) {
@@ -224,7 +224,7 @@ export class AirHockeyScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        subtitle: `${this.p1} – ${this.p2}`,
+        subtitle: `${this.p1} â€“ ${this.p2}`,
         onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
         onHome: () => this.toHub(true),
       }),
@@ -236,3 +236,4 @@ export class AirHockeyScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

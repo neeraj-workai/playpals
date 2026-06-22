@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -49,7 +49,7 @@ export class TankDuelScene extends Phaser.Scene {
     this.p2Score = 0;
     this.over = false;
     this.shells = [];
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x3d1f00); // dark orange
     this.input.addPointer(2);
 
     this.add.line(0, 0, 0, MID_Y, GAME_WIDTH, MID_Y, 0xffffff, 0.08).setOrigin(0).setLineWidth(1);
@@ -66,7 +66,7 @@ export class TankDuelScene extends Phaser.Scene {
     this.time.addEvent({ delay: FIRE_MS, loop: true, startAt: 300, callback: () => this.fire(1) });
     this.time.addEvent({ delay: FIRE_MS, loop: true, callback: () => this.fire(2) });
 
-    // Tank follows the pointer (mouse move / finger drag) — no need to hold.
+    // Tank follows the pointer (mouse move / finger drag) â€” no need to hold.
     this.input.on('pointermove', this.onPointer, this);
     this.input.on('pointerdown', this.onPointer, this);
   }
@@ -166,7 +166,7 @@ export class TankDuelScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        subtitle: `${this.p1Score} – ${this.p2Score}`,
+        subtitle: `${this.p1Score} â€“ ${this.p2Score}`,
         onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
         onHome: () => this.toHub(true),
       }),
@@ -178,3 +178,4 @@ export class TankDuelScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

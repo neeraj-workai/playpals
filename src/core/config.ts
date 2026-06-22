@@ -246,6 +246,72 @@ export const GAMES: GameDef[] = [
       { n: 3, t: 'First to 5 correct calls wins' },
     ],
   },
+  {
+    key: 'emojiquiz', title: 'Emoji Quiz', blurb: 'Match the sequence', scene: 'EmojiQuiz', icon: '🤩',
+    grad: g(0xffa8e0, 0xff5fba), cssGrad: cg('#FFA8E0', '#FF5FBA'),
+    tint: '#FFEAF7', tintHex: 0xffeaf7, accentHex: 0xff5fba,
+    time: '2 min', diff: 'Easy',
+    howto: [
+      { n: 1, t: 'Watch the 3-emoji sequence carefully' },
+      { n: 2, t: 'Find it from 4 choices in your zone' },
+      { n: 3, t: 'First to 3 correct rounds wins' },
+    ],
+  },
+  {
+    key: 'countdown', title: 'Countdown Duel', blurb: 'Race to zero', scene: 'Countdown', icon: '⏳',
+    grad: g(0xa78bfa, 0x7c3aed), cssGrad: cg('#A78BFA', '#7C3AED'),
+    tint: '#EDE9FE', tintHex: 0xede9fe, accentHex: 0x7c3aed,
+    time: '30 sec', diff: 'Easy',
+    howto: [
+      { n: 1, t: 'Your counter starts at 30' },
+      { n: 2, t: 'Tap your side to count it down' },
+      { n: 3, t: 'First to reach zero wins the round' },
+    ],
+  },
+  {
+    key: 'wordscramble', title: 'Word Scramble', blurb: 'Unscramble fastest', scene: 'WordScramble', icon: '🔤',
+    grad: g(0x6ee7b7, 0x059669), cssGrad: cg('#6EE7B7', '#059669'),
+    tint: '#D1FAE5', tintHex: 0xd1fae5, accentHex: 0x059669,
+    time: '3 min', diff: 'Medium',
+    howto: [
+      { n: 1, t: 'A scrambled 4-letter word appears' },
+      { n: 2, t: 'Tap the letters in the right order' },
+      { n: 3, t: 'Unscramble it first to win the round' },
+    ],
+  },
+  {
+    key: 'gravitypong', title: 'Gravity Pong', blurb: 'Pong with a twist', scene: 'GravityPong', icon: '🏓',
+    grad: g(0x67e8f9, 0x0891b2), cssGrad: cg('#67E8F9', '#0891B2'),
+    tint: '#CFFAFE', tintHex: 0xcffafe, accentHex: 0x0891b2,
+    time: '3 min', diff: 'Medium',
+    howto: [
+      { n: 1, t: 'Drag your paddle to hit the ball' },
+      { n: 2, t: 'Gravity flips direction every 5 seconds' },
+      { n: 3, t: 'First to 7 points wins' },
+    ],
+  },
+  {
+    key: 'bombdiffuse', title: 'Bomb Diffuse', blurb: 'Co-op countdown', scene: 'BombDiffuse', icon: '💣',
+    grad: g(0xfca5a5, 0xdc2626), cssGrad: cg('#FCA5A5', '#DC2626'),
+    tint: '#FEE2E2', tintHex: 0xfee2e2, accentHex: 0xdc2626,
+    time: '2 min', diff: 'Easy',
+    howto: [
+      { n: 1, t: 'Each player sees half the secret code' },
+      { n: 2, t: 'Tap your digits in order together' },
+      { n: 3, t: 'Defuse 3 bombs before the timer runs out' },
+    ],
+  },
+  {
+    key: 'flipgrid', title: 'Flip the Grid', blurb: 'Flip to your colour', scene: 'FlipGrid', icon: '🟦',
+    grad: g(0x86efac, 0x16a34a), cssGrad: cg('#86EFAC', '#16A34A'),
+    tint: '#DCFCE7', tintHex: 0xdcfce7, accentHex: 0x16a34a,
+    time: '3 min', diff: 'Medium',
+    howto: [
+      { n: 1, t: 'Take turns tapping any empty tile' },
+      { n: 2, t: 'Adjacent enemy tiles flip to your colour' },
+      { n: 3, t: 'Most tiles when the grid fills wins' },
+    ],
+  },
 ];
 
 // Used by the Hub: first 6 are "featured" (always visible); rest are revealed

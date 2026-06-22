@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -60,7 +60,7 @@ export class TrailClashScene extends Phaser.Scene {
     this.p1 = 0;
     this.p2 = 0;
     this.over = false;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x0a3d40); // dark teal
 
     this.add.rectangle(GAME_WIDTH / 2, MID_Y, COLS * CELL + 6, ROWS * CELL + 6, 0x141a26, 1).setStrokeStyle(2, 0x33405e, 1);
 
@@ -218,7 +218,7 @@ export class TrailClashScene extends Phaser.Scene {
     showResult(this, {
       title,
       titleColor: color,
-      subtitle: `${this.p1} – ${this.p2}`,
+      subtitle: `${this.p1} â€“ ${this.p2}`,
       onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
       onHome: () => this.toHub(true),
     });
@@ -230,3 +230,4 @@ export class TrailClashScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

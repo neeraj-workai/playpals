@@ -23,6 +23,12 @@ import { WhackScene } from './games/whackamole/WhackScene';
 import { DotsBoxesScene } from './games/dotsboxes/DotsBoxesScene';
 import { TapRaceScene } from './games/taprace/TapRaceScene';
 import { CoinTossScene } from './games/cointoss/CoinTossScene';
+import { EmojiQuizScene } from './games/emojiquiz/EmojiQuizScene';
+import { CountdownScene } from './games/countdown/CountdownScene';
+import { WordScrambleScene } from './games/wordscramble/WordScrambleScene';
+import { GravityPongScene } from './games/gravitypong/GravityPongScene';
+import { BombDiffuseScene } from './games/bombdiffuse/BombDiffuseScene';
+import { FlipGridScene } from './games/flipgrid/FlipGridScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -73,6 +79,12 @@ const config: Phaser.Types.Core.GameConfig = {
     DotsBoxesScene,
     TapRaceScene,
     CoinTossScene,
+    EmojiQuizScene,
+    CountdownScene,
+    WordScrambleScene,
+    GravityPongScene,
+    BombDiffuseScene,
+    FlipGridScene,
   ],
 };
 

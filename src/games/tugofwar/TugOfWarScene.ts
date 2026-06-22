@@ -46,7 +46,7 @@ export class TugOfWarScene extends Phaser.Scene {
     this.knotY = CENTER_Y;
     this.over = false;
     this.locked = true;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x3d0a1a); // dark rose
 
     this.add.rectangle(GAME_WIDTH / 2, (64 + CENTER_Y) / 2, GAME_WIDTH, CENTER_Y - 64, COLORS.p2, 0.12);
     this.add.rectangle(GAME_WIDTH / 2, (CENTER_Y + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - CENTER_Y, COLORS.p1, 0.12);

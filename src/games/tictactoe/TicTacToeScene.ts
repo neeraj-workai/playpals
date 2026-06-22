@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
@@ -43,7 +43,7 @@ export class TicTacToeScene extends Phaser.Scene {
     this.locked = false;
     this.marks = [];
 
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x3d2200); // dark amber
     addBackButton(this, () => this.toHub(false));
 
     this.status = this.add
@@ -143,7 +143,7 @@ export class TicTacToeScene extends Phaser.Scene {
     const block = completes(1);
     if (block >= 0) return block;
 
-    // 70% play strategically, 30% random — keeps the CPU beatable.
+    // 70% play strategically, 30% random â€” keeps the CPU beatable.
     const options = empty();
     if (Math.random() < 0.7) {
       if (this.cells[4] === 0) return 4;
@@ -158,7 +158,7 @@ export class TicTacToeScene extends Phaser.Scene {
     let label: string;
     let color: number;
     if (this.mode === 'ai') {
-      label = this.current === 1 ? 'Your turn  (X)' : 'CPU thinking…';
+      label = this.current === 1 ? 'Your turn  (X)' : 'CPU thinkingâ€¦';
     } else {
       label = this.current === 1 ? 'P1 turn  (X)' : 'P2 turn  (O)';
     }
@@ -207,3 +207,4 @@ export class TicTacToeScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
+

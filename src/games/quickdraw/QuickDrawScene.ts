@@ -44,7 +44,7 @@ export class QuickDrawScene extends Phaser.Scene {
     this.phase = 'intro';
     this.p1 = 0;
     this.p2 = 0;
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x0a3d22); // dark green
 
     const topLabel = this.mode === 'ai' ? 'CPU' : 'P2';
     this.topPanel = this.add.rectangle(GAME_WIDTH / 2, 188, GAME_WIDTH, 296, NEUTRAL, 1);
