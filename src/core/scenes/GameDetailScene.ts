@@ -74,36 +74,77 @@ export class GameDetailScene extends Phaser.Scene {
     };
     statsRow.append(stat('👥', '2 players'), stat('⏱', def.time), stat('⭐', def.diff));
 
-    // howto
-    const howtoTitle = document.createElement('div');
-    howtoTitle.style.cssText = 'flex:none;font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:15px;color:' + INK + ';margin:8px 0 4px;';
-    howtoTitle.textContent = 'How to play';
-    const howto = document.createElement('div');
-    howto.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;';
-    def.howto.forEach((s) => {
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:8px 12px;box-shadow:0 4px 12px rgba(80,60,140,.05);';
-      row.innerHTML =
-        '<div style="flex:none;width:30px;height:30px;border-radius:50%;background:' + def.cssGrad + ';color:#fff;font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">' + s.n + '</div>' +
-        '<div style="font-weight:700;font-size:13px;color:' + INK + ';line-height:1.2">' + s.t + '</div>';
-      howto.append(row);
-    });
+    // tab bar
+    let activeTab: 'players' | 'howto' = 'players';
+    const tabBar = document.createElement('div');
+    tabBar.style.cssText = 'flex:none;display:flex;gap:6px;margin-top:10px;background:rgba(255,255,255,.7);padding:4px;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(80,60,140,.07);';
+    const tabPlayers = tabBtn('Players');
+    const tabHowto = tabBtn('How to play');
+    tabBar.append(tabPlayers, tabHowto);
+
+    function tabBtn(label: string): HTMLButtonElement {
+      const b = document.createElement('button');
+      b.textContent = label;
+      return b;
+    }
+    function styleTabBar() {
+      [tabPlayers, tabHowto].forEach((b, i) => {
+        const sel = (i === 0 && activeTab === 'players') || (i === 1 && activeTab === 'howto');
+        b.style.cssText =
+          'flex:1;height:38px;border:none;border-radius:12px;cursor:pointer;font-family:' + FONT_DISPLAY +
+          ';font-weight:800;font-size:13px;transition:all .15s;' +
+          'background:' + (sel ? '#fff' : 'transparent') + ';' +
+          'color:' + (sel ? hex2css(def.accentHex) : INK_DIM) + ';' +
+          'box-shadow:' + (sel ? '0 4px 10px rgba(80,60,140,.10)' : 'none') + ';';
+      });
+    }
+
+    // tab panel — fills remaining space, clips overflow
+    const tabPanel = document.createElement('div');
+    tabPanel.style.cssText = 'flex:1;min-height:0;overflow:hidden;margin-top:8px;';
+
+    // Players panel: mode toggle + pickers
+    const playersPanel = document.createElement('div');
+    playersPanel.style.cssText = 'height:100%;display:flex;flex-direction:column;gap:8px;overflow-y:auto;';
 
     // mode toggle
     const seg = document.createElement('div');
-    seg.style.cssText = 'flex:none;display:flex;gap:6px;margin-top:8px;background:rgba(255,255,255,.7);padding:4px;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(80,60,140,.07);';
+    seg.style.cssText = 'flex:none;display:flex;gap:6px;background:rgba(255,255,255,.7);padding:4px;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(80,60,140,.07);';
     const seg1 = segBtn('1P · vs CPU');
     const seg2 = segBtn('2P · Pass & play');
     seg.append(seg1, seg2);
 
     // P1 + P2 picker sections side-by-side (visible only in 2P mode)
     const pickerRow = document.createElement('div');
-    pickerRow.style.cssText = 'flex:none;display:flex;gap:10px;margin-top:8px;';
+    pickerRow.style.cssText = 'flex:none;display:flex;gap:10px;';
     const p1Section = document.createElement('div');
     p1Section.style.cssText = 'flex:1;min-width:0;';
     const p2Section = document.createElement('div');
     p2Section.style.cssText = 'flex:1;min-width:0;';
     pickerRow.append(p1Section, p2Section);
+    playersPanel.append(seg, pickerRow);
+
+    // How to play panel
+    const howtoPanel = document.createElement('div');
+    howtoPanel.style.cssText = 'height:100%;display:flex;flex-direction:column;gap:6px;overflow-y:auto;';
+    def.howto.forEach((s) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:8px 12px;box-shadow:0 4px 12px rgba(80,60,140,.05);';
+      row.innerHTML =
+        '<div style="flex:none;width:30px;height:30px;border-radius:50%;background:' + def.cssGrad + ';color:#fff;font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">' + s.n + '</div>' +
+        '<div style="font-weight:700;font-size:13px;color:' + INK + ';line-height:1.2">' + s.t + '</div>';
+      howtoPanel.append(row);
+    });
+
+    function switchTab(tab: 'players' | 'howto') {
+      activeTab = tab;
+      styleTabBar();
+      tabPanel.innerHTML = '';
+      tabPanel.append(tab === 'players' ? playersPanel : howtoPanel);
+    }
+
+    tabPlayers.addEventListener('click', () => { audio.click(); switchTab('players'); });
+    tabHowto.addEventListener('click', () => { audio.click(); switchTab('howto'); });
 
     function renderP1Picker() {
       p1Section.innerHTML = '';
@@ -182,8 +223,10 @@ export class GameDetailScene extends Phaser.Scene {
       });
     }
     styleSeg();
+    styleTabBar();
     renderP1Picker();
     renderP2Picker();
+    switchTab('players');
 
     // start button
     const start = document.createElement('button');
@@ -195,13 +238,12 @@ export class GameDetailScene extends Phaser.Scene {
       'box-shadow:0 10px 22px rgba(74,68,102,.22);';
     start.addEventListener('click', () => {
       audio.click();
-      // Always set session so ResultOverlay can record wins
       Session.setGame(def.key, mode === '2p' ? selectedP1Id : 'main', mode === '2p' ? selectedP2Id : '');
       if (mode === '2p') this.scene.start('PassPlay', { key: def.key, player1Id: selectedP1Id, player2Id: selectedP2Id });
       else this.scene.start(def.scene, { mode });
     });
 
-    root.append(back, hero, statsRow, howtoTitle, howto, seg, pickerRow, start);
+    root.append(back, hero, statsRow, tabBar, tabPanel, start);
     mountOnStage(this, root);
     this.root = root;
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.root = undefined; });
