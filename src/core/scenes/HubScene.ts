@@ -50,28 +50,56 @@ export class HubScene extends Phaser.Scene {
     content.append(header);
 
     // ---------- game grid (fills the rest, no scroll) ----------
-    // grid-auto-rows:1fr divides the remaining height into equal rows so all
-    // games always fit, whatever the count.
+    // 2-col grid matching "2 Player Games" app style — full-gradient cards.
     const grid = document.createElement('div');
     grid.style.cssText =
-      'flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);' +
-      'grid-auto-rows:1fr;gap:9px;';
+      'flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,1fr);' +
+      'grid-auto-rows:1fr;gap:10px;';
     GAMES.forEach((def) => grid.append(this.tile(def)));
     content.append(grid);
   }
 
   private tile(def: GameDef): HTMLButtonElement {
     const btn = document.createElement('button');
+    const grad = `linear-gradient(145deg,${hexc(def.grad[0])},${hexc(def.grad[1])})`;
     btn.style.cssText =
-      'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;' +
-      'background:#fff;border:none;cursor:pointer;border-radius:20px;padding:6px 4px;' +
-      'box-shadow:0 6px 14px rgba(80,60,140,.08);overflow:hidden;min-height:0;transition:transform .12s;';
-    btn.innerHTML =
-      `<div style="flex:none;width:44px;height:44px;border-radius:15px;display:flex;align-items:center;` +
-      `justify-content:center;font-size:24px;background:${cssGradient({ start: hexc(def.grad[0]), end: hexc(def.grad[1]) })};` +
-      `box-shadow:0 5px 12px rgba(74,68,102,.16)">${def.icon}</div>` +
-      `<div style="font-family:${FONT_DISPLAY};font-weight:700;font-size:12px;color:${INK};line-height:1.05;` +
-      `text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(def.title)}</div>`;
+      'position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;' +
+      `padding:0 0 12px;border:none;cursor:pointer;border-radius:22px;overflow:hidden;min-height:0;` +
+      `background:${grad};box-shadow:0 8px 20px rgba(0,0,0,.18);transition:transform .12s;`;
+
+    // inner highlight strip at top for depth
+    const shine = document.createElement('div');
+    shine.style.cssText =
+      'position:absolute;top:0;left:0;right:0;height:40%;' +
+      'background:linear-gradient(180deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 100%);' +
+      'pointer-events:none;';
+
+    // 1P/2P badge top-right
+    const badge = document.createElement('div');
+    badge.textContent = '1P · 2P';
+    badge.style.cssText =
+      'position:absolute;top:10px;right:10px;' +
+      'background:rgba(0,0,0,.28);backdrop-filter:blur(4px);' +
+      'color:#fff;font-family:' + FONT_BODY + ';font-weight:800;font-size:9px;' +
+      'letter-spacing:.4px;padding:3px 7px;border-radius:20px;line-height:1;';
+
+    // big emoji
+    const icon = document.createElement('div');
+    icon.textContent = def.icon;
+    icon.style.cssText =
+      'flex:1;display:flex;align-items:center;justify-content:center;font-size:48px;' +
+      'filter:drop-shadow(0 4px 8px rgba(0,0,0,.25));';
+
+    // title
+    const title = document.createElement('div');
+    title.textContent = def.title;
+    title.style.cssText =
+      `font-family:${FONT_DISPLAY};font-weight:800;font-size:14px;color:#fff;` +
+      'text-align:center;line-height:1.1;text-shadow:0 2px 6px rgba(0,0,0,.3);' +
+      'max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:none;';
+
+    btn.append(shine, badge, icon, title);
+
     btn.addEventListener('pointerdown', () => btn.style.transform = 'scale(.95)');
     btn.addEventListener('pointerup', () => btn.style.transform = 'scale(1)');
     btn.addEventListener('pointercancel', () => btn.style.transform = 'scale(1)');

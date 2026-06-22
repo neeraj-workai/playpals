@@ -192,17 +192,6 @@ export const GAMES: GameDef[] = [
     ],
   },
   {
-    key: 'bullseye', title: 'Bullseye', blurb: 'Stop on gold', scene: 'Bullseye', icon: '🎯',
-    grad: g(0xfde68a, 0xfacc15), cssGrad: cg('#FDE68A', '#FACC15'),
-    tint: '#FFF7D1', tintHex: 0xfff7d1, accentHex: 0xfacc15,
-    time: '1 min', diff: 'Easy',
-    howto: [
-      { n: 1, t: 'A bar sweeps left and right' },
-      { n: 2, t: 'Tap your side to stop on the gold' },
-      { n: 3, t: 'Closest to centre wins the round' },
-    ],
-  },
-  {
     key: 'tank', title: 'Tank Duel', blurb: 'Aim and dodge', scene: 'Tank', icon: '💥',
     grad: g(0xfdba74, 0xfb923c), cssGrad: cg('#FDBA74', '#FB923C'),
     tint: '#FFEFE0', tintHex: 0xffefe0, accentHex: 0xfb923c,
@@ -244,17 +233,6 @@ export const GAMES: GameDef[] = [
       { n: 1, t: 'Tap your big button as fast as you can' },
       { n: 2, t: 'Fill your bar all the way up' },
       { n: 3, t: 'First to 50 taps wins the race' },
-    ],
-  },
-  {
-    key: 'bubble', title: 'Bubble Pop', blurb: 'Pop them fast', scene: 'BubblePop', icon: '🫧',
-    grad: g(0x79d9ef, 0x38c0e0), cssGrad: cg('#79D9EF', '#38C0E0'),
-    tint: '#E3F7FC', tintHex: 0xe3f7fc, accentHex: 0x38c0e0,
-    time: '20 sec', diff: 'Easy',
-    howto: [
-      { n: 1, t: 'Bubbles float up on your side' },
-      { n: 2, t: 'Tap to pop them before they escape' },
-      { n: 3, t: 'Most pops in 20 seconds wins' },
     ],
   },
   {

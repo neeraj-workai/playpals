@@ -21,9 +21,7 @@ import { HotPotatoScene } from './games/hotpotato/HotPotatoScene';
 import { MemoryScene } from './games/memory/MemoryScene';
 import { WhackScene } from './games/whackamole/WhackScene';
 import { DotsBoxesScene } from './games/dotsboxes/DotsBoxesScene';
-import { BullseyeScene } from './games/bullseye/BullseyeScene';
 import { TapRaceScene } from './games/taprace/TapRaceScene';
-import { BubblePopScene } from './games/bubblepop/BubblePopScene';
 import { CoinTossScene } from './games/cointoss/CoinTossScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -73,9 +71,7 @@ const config: Phaser.Types.Core.GameConfig = {
     MemoryScene,
     WhackScene,
     DotsBoxesScene,
-    BullseyeScene,
     TapRaceScene,
-    BubblePopScene,
     CoinTossScene,
   ],
 };
