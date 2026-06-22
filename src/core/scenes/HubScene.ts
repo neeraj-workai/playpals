@@ -49,14 +49,20 @@ export class HubScene extends Phaser.Scene {
     header.append(avatar, greet, gear);
     content.append(header);
 
-    // ---------- game grid (fills the rest, no scroll) ----------
-    // 2-col grid matching "2 Player Games" app style — full-gradient cards.
+    // ---------- scrollable game grid ----------
+    // Scroller sits between the fixed header and the bottom nav.
+    // grid-auto-rows gives each card a natural size instead of squishing to fit.
+    const scroller = document.createElement('div');
+    scroller.style.cssText =
+      'flex:1;overflow-y:auto;margin:0 -20px;padding:0 20px 12px;';
+
     const grid = document.createElement('div');
     grid.style.cssText =
-      'flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,1fr);' +
-      'grid-auto-rows:1fr;gap:10px;';
+      'display:grid;grid-template-columns:repeat(2,1fr);' +
+      'grid-auto-rows:160px;gap:10px;';
     GAMES.forEach((def) => grid.append(this.tile(def)));
-    content.append(grid);
+    scroller.append(grid);
+    content.append(scroller);
   }
 
   private tile(def: GameDef): HTMLButtonElement {
