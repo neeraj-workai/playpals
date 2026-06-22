@@ -3,6 +3,7 @@ import { Profile, AVATARS } from '../profile/Profile';
 import { audio } from '../audio/AudioManager';
 import { PALETTE, FONT_DISPLAY, FONT_BODY, INK, INK_DIM, INK_LABEL, BLOB_RADIUS, cssGradient } from '../design';
 import { ensureSoleActiveScene } from '../ui/NavGuard';
+import { mountOnStage } from '../ui/Stage';
 
 // First-launch registration: name + buddy + colour. Rendered as an HTML
 // overlay so the native keyboard + crisp text work on any device. Visual
@@ -27,8 +28,8 @@ export class OnboardingScene extends Phaser.Scene {
 
     const root = document.createElement('div');
     root.style.cssText =
-      'position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;' +
-      'overflow-y:auto;padding:32px 28px 40px;box-sizing:border-box;font-family:' + FONT_BODY + ';' +
+      'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'overflow:hidden;padding:18px 24px;box-sizing:border-box;font-family:' + FONT_BODY + ';' +
       'background:linear-gradient(175deg,#EDE7FF 0%,#FDEAF4 55%,#E6FBF4 100%);color:' + INK + ';' +
       '-webkit-tap-highlight-color:transparent;text-align:center;';
 
@@ -47,7 +48,7 @@ export class OnboardingScene extends Phaser.Scene {
 
     const big = document.createElement('div');
     big.textContent = editing ? 'Player' : 'PlayPals';
-    big.style.cssText = 'font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:42px;line-height:1;color:#7E5BEF;letter-spacing:-1px;';
+    big.style.cssText = 'font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:34px;line-height:1;color:#7E5BEF;letter-spacing:-1px;';
 
     const tag = document.createElement('div');
     tag.textContent = 'Make your player to start the fun';
@@ -56,8 +57,8 @@ export class OnboardingScene extends Phaser.Scene {
     // blob avatar preview
     const blob = document.createElement('div');
     blob.style.cssText =
-      'margin:24px auto 6px;width:124px;height:124px;border-radius:' + BLOB_RADIUS + ';' +
-      'display:flex;align-items:center;justify-content:center;font-size:64px;' +
+      'margin:12px auto 4px;width:92px;height:92px;border-radius:' + BLOB_RADIUS + ';' +
+      'display:flex;align-items:center;justify-content:center;font-size:48px;' +
       'box-shadow:0 16px 32px rgba(74,68,102,.18);animation:pp-float 3.2s ease-in-out infinite;';
     const nameLabel = document.createElement('div');
     nameLabel.style.cssText = 'font-family:' + FONT_DISPLAY + ';font-weight:700;font-size:23px;color:' + INK + ';margin-top:8px;';
@@ -74,7 +75,7 @@ export class OnboardingScene extends Phaser.Scene {
     input.placeholder = 'Type your name';
     input.value = state.name;
     input.style.cssText =
-      'margin-top:18px;width:100%;height:56px;border:none;border-radius:22px;background:#fff;' +
+      'margin-top:12px;width:100%;height:50px;border:none;border-radius:20px;background:#fff;' +
       'box-shadow:0 6px 16px rgba(74,68,102,.07);text-align:center;font-family:' + FONT_DISPLAY + ';' +
       'font-weight:700;font-size:18px;color:' + INK + ';outline:none;box-sizing:border-box;padding:0 14px;';
     input.addEventListener('input', () => { state.name = input.value; refresh(); });
@@ -100,7 +101,7 @@ export class OnboardingScene extends Phaser.Scene {
       avatarBtns.forEach((b, i) => {
         const sel = i === state.avatarIdx;
         b.style.cssText =
-          'width:50px;height:50px;border-radius:18px;border:none;font-size:26px;cursor:pointer;' +
+          'width:44px;height:44px;border-radius:16px;border:none;font-size:23px;cursor:pointer;' +
           'display:flex;align-items:center;justify-content:center;padding:0;transition:transform .12s;' +
           'background:' + (sel ? cssGradient(PALETTE[state.colorIdx]) : '#fff') + ';' +
           'box-shadow:' + (sel ? '0 8px 16px rgba(74,68,102,.2)' : '0 5px 12px rgba(74,68,102,.07)') + ';';
@@ -130,7 +131,7 @@ export class OnboardingScene extends Phaser.Scene {
       colorBtns.forEach((b, i) => {
         const sel = i === state.colorIdx;
         b.style.cssText =
-          'width:42px;height:42px;border-radius:50%;cursor:pointer;padding:0;' +
+          'width:38px;height:38px;border-radius:50%;cursor:pointer;padding:0;' +
           'background:' + cssGradient(PALETTE[i]) + ';' +
           'border:4px solid ' + (sel ? 'rgba(74,68,102,.85)' : 'rgba(0,0,0,0)') + ';' +
           'box-shadow:0 5px 12px rgba(74,68,102,.14);';
@@ -149,7 +150,7 @@ export class OnboardingScene extends Phaser.Scene {
     const later = document.createElement('button');
     later.textContent = 'Maybe later';
     later.style.cssText =
-      'margin-top:16px;background:none;border:none;color:' + INK_DIM + ';font-family:' + FONT_BODY +
+      'margin-top:8px;background:none;border:none;color:' + INK_DIM + ';font-family:' + FONT_BODY +
       ';font-weight:800;font-size:15px;cursor:pointer;';
     later.addEventListener('click', () => {
       audio.click();
@@ -161,8 +162,8 @@ export class OnboardingScene extends Phaser.Scene {
 
     const refreshStart = (): void => {
       start.style.cssText =
-        'margin-top:30px;width:100%;height:62px;border:none;border-radius:26px;color:#fff;' +
-        'font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:21px;cursor:pointer;' +
+        'margin-top:16px;width:100%;height:56px;border:none;border-radius:24px;color:#fff;' +
+        'font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:20px;cursor:pointer;' +
         'background:' + cssGradient(PALETTE[state.colorIdx]) + ';' +
         'box-shadow:0 12px 24px rgba(74,68,102,.22);transition:transform .12s;';
     };
@@ -170,7 +171,7 @@ export class OnboardingScene extends Phaser.Scene {
     function sectionLabel(text: string): HTMLDivElement {
       const d = document.createElement('div');
       d.textContent = text;
-      d.style.cssText = 'font-size:13px;color:' + INK_LABEL + ';font-weight:800;margin:24px 0 12px;letter-spacing:1px;';
+      d.style.cssText = 'font-size:13px;color:' + INK_LABEL + ';font-weight:800;margin:12px 0 8px;letter-spacing:1px;';
       return d;
     }
 
@@ -182,9 +183,8 @@ export class OnboardingScene extends Phaser.Scene {
 
     content.append(small, big, tag, blob, nameLabel, input, avatarLabel, avatarGrid, colorLabel, colorGrid, start, later);
     root.append(blob1, blob2, content);
-    document.body.appendChild(root);
+    mountOnStage(this, root);
     this.root = root;
-
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.root?.remove(); this.root = undefined; });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.root = undefined; });
   }
 }

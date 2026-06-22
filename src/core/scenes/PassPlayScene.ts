@@ -2,10 +2,9 @@ import Phaser from 'phaser';
 import { GAMES } from '../config';
 import { Profile, AVATARS } from '../profile/Profile';
 import { audio } from '../audio/AudioManager';
-import { paintPageBg } from '../ui/PageHelpers';
+import { mountOnStage } from '../ui/Stage';
 import { ensureSoleActiveScene } from '../ui/NavGuard';
 import { FONT_DISPLAY, FONT_BODY, INK, INK_DIM, BLOB_RADIUS, cssGradient, P2_RAMP, INK_TERTIARY } from '../design';
-import { setupSceneScale } from '../scale';
 
 // Brief "Pass & Play" interstitial before a 2P game launches. Shows both
 // players as blob avatars with a "YOUR TURN" badge on the starting player —
@@ -24,8 +23,6 @@ export class PassPlayScene extends Phaser.Scene {
 
   create(): void {
     ensureSoleActiveScene(this);
-    setupSceneScale(this);
-    paintPageBg(this);
     const def = GAMES.find((g) => g.key === this.gameKey) ?? GAMES[0];
     const pal = Profile.pal();
     const name = Profile.name();
@@ -33,8 +30,9 @@ export class PassPlayScene extends Phaser.Scene {
 
     const root = document.createElement('div');
     root.style.cssText =
-      'position:absolute;inset:0;padding:24px 24px 28px;text-align:center;font-family:' + FONT_BODY +
-      ';color:' + INK + ';-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;';
+      'position:absolute;inset:0;padding:20px 24px 20px;text-align:center;font-family:' + FONT_BODY +
+      ';background:linear-gradient(180deg,#F3EEFF 0%,#FCF1F7 100%);overflow:hidden;' +
+      'color:' + INK + ';-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;';
 
     const back = document.createElement('button');
     back.innerHTML = '←';
@@ -86,9 +84,9 @@ export class PassPlayScene extends Phaser.Scene {
     ready.addEventListener('click', () => { audio.click(); this.scene.start(def.scene, { mode: '2p' }); });
 
     root.append(back, clear, title, tag, row, pillWrap, ready);
-    document.body.appendChild(root);
+    mountOnStage(this, root);
     this.root = root;
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.root?.remove(); this.root = undefined; });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.root = undefined; });
 
     function playerCard(o: { avatar: string; name: string; sub: string; grad: string; youTurn?: boolean; badgeBg?: string }): HTMLDivElement {
       const card = document.createElement('div');

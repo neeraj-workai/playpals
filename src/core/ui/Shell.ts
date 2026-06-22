@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Profile, AVATARS } from '../profile/Profile';
 import { audio } from '../audio/AudioManager';
+import { mountOnStage } from './Stage';
 import { FONT_BODY, INK, hex2css } from '../design';
 
 export type NavKey = 'home' | 'leaderboard' | 'profile' | 'settings';
@@ -29,20 +30,20 @@ export function createShell(scene: Phaser.Scene, active: NavKey): Shell {
 
   const root = document.createElement('div');
   root.style.cssText =
-    'position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;' +
+    'position:absolute;inset:0;display:flex;flex-direction:column;' +
     'background:linear-gradient(180deg,#F3EEFF 0%,#FCF1F7 100%);' +
     'font-family:' + FONT_BODY + ';color:' + INK + ';-webkit-tap-highlight-color:transparent;';
 
+  // No scrolling: the content area is a fixed flex region between the top and
+  // the bottom nav. Each screen is laid out to fit this height exactly.
   const content = document.createElement('div');
-  content.className = 'pp-scroll';
   content.style.cssText =
-    'flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;' +
-    'padding:calc(env(safe-area-inset-top) + 16px) 22px 14px;';
+    'flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;' +
+    'padding:18px 20px 8px;';
 
   const nav = document.createElement('div');
   nav.style.cssText =
-    'flex:none;display:flex;background:#fff;' +
-    'padding:10px 8px calc(env(safe-area-inset-bottom) + 12px);' +
+    'flex:none;display:flex;background:#fff;padding:8px 8px 12px;' +
     'box-shadow:0 -4px 18px rgba(80,60,140,.06);';
 
   NAV.forEach((item) => {
@@ -65,8 +66,7 @@ export function createShell(scene: Phaser.Scene, active: NavKey): Shell {
   });
 
   root.append(content, nav);
-  document.body.appendChild(root);
-  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => root.remove());
+  mountOnStage(scene, root);
   return { root, content };
 }
 

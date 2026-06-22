@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAMES } from '../config';
 import { Profile, AVATARS } from '../profile/Profile';
 import { audio } from '../audio/AudioManager';
+import { mountOnStage } from './Stage';
 import { FONT_DISPLAY, FONT_BODY, INK, INK_DIM, PALETTE, BLOB_RADIUS, cssGradient, hex2css, P2_RAMP } from '../design';
 
 // Match-end result screen, rendered as a full-screen HTML overlay so the
@@ -34,8 +35,9 @@ export function showResult(scene: Phaser.Scene, opts: ResultOpts): Phaser.GameOb
 
   const root = document.createElement('div');
   root.style.cssText =
-    'position:fixed;inset:0;z-index:9500;padding:24px 24px 32px;text-align:center;font-family:' + FONT_BODY +
+    'position:absolute;inset:0;padding:24px 24px 28px;text-align:center;font-family:' + FONT_BODY +
     ';color:' + INK + ';-webkit-tap-highlight-color:transparent;overflow:hidden;animation:pp-pop .35s ease;' +
+    'display:flex;flex-direction:column;align-items:stretch;' +
     'background:linear-gradient(180deg,#FFF4E0,#FCF1F7);';
 
   // confetti (14 falling pieces)
@@ -85,13 +87,13 @@ export function showResult(scene: Phaser.Scene, opts: ResultOpts): Phaser.GameOb
   home.addEventListener('click', () => { audio.click(); cleanup(); opts.onHome(); });
 
   root.append(trophy, titleEl, game, card, again, home);
-  document.body.appendChild(root);
+  // mountOnStage also removes the layer on scene shutdown, so the overlay can
+  // never outlive its game scene.
+  mountOnStage(scene, root);
 
   function cleanup(): void {
     root.remove();
   }
-  // also clean up if the scene shuts down for any reason
-  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, cleanup);
 
   // return an empty container to satisfy the previous API
   return scene.add.container(0, 0);
