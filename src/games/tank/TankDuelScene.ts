@@ -166,7 +166,7 @@ export class TankDuelScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        subtitle: `${this.p1Score} â€“ ${this.p2Score}`,
+        subtitle: `${this.p1Score} – ${this.p2Score}`,
         onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
         onHome: () => this.toHub(true),
       }),

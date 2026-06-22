@@ -92,7 +92,7 @@ export class CoinTossScene extends Phaser.Scene {
     if (this.over) return;
     this.locked = false;
     const label = this.mode === 'ai'
-      ? (this.current === 1 ? 'Your call â€” heads or tails?' : 'CPU callingâ€¦')
+      ? (this.current === 1 ? 'Your call â€” heads or tails?' : 'CPU calling…')
       : `P${this.current} â€” call it`;
     const color = this.current === 1 ? '#' + COLORS.p1.toString(16) : '#' + COLORS.p2.toString(16);
     this.turnText.setText(label).setColor(color);
@@ -133,7 +133,7 @@ export class CoinTossScene extends Phaser.Scene {
       this.p1Text.setText(String(this.p1));
       this.p2Text.setText(String(this.p2));
       audio.goal();
-      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} â€” correct! âœ“`);
+      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} â€” correct! ✓`);
     } else {
       audio.bump();
       this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} â€” nope!`);
@@ -159,7 +159,7 @@ export class CoinTossScene extends Phaser.Scene {
     }
     showResult(this, {
       title,
-      subtitle: `${this.p1} â€“ ${this.p2}`,
+      subtitle: `${this.p1} – ${this.p2}`,
       onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
       onHome: () => this.toHub(true),
     });

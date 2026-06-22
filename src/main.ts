@@ -45,6 +45,7 @@ const config: Phaser.Types.Core.GameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   render: { antialias: true, antialiasGL: true, pixelArt: false, roundPixels: false },
+  input: { activePointers: 2 },
   physics: {
     default: 'arcade',
     arcade: { gravity: { x: 0, y: 0 }, debug: false },
@@ -89,10 +90,9 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 const game = new Phaser.Game(config);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as unknown as Record<string, any>).__game = game;
 if (import.meta.env.DEV) {
-  // Dev-only globals for browser-console smoke testing.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const w = window as unknown as Record<string, any>;
-  w.__game = game;
-  void import('./core/ads/AdManager').then((m) => { w.__Ads = m.Ads; });
+  void import('./core/ads/AdManager').then((m) => { (window as unknown as Record<string, any>).__Ads = m.Ads; });
 }

@@ -58,7 +58,7 @@ export class CountdownScene extends Phaser.Scene {
     this.p2WinsText = this.add.text(GAME_WIDTH - 16, TOP_H / 2, '0 wins', winsStyle).setOrigin(1, 0.5).setAngle(180).setDepth(5);
     this.p1WinsText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - BOT_H / 2, '0 wins', winsStyle).setOrigin(1, 0.5).setDepth(5);
 
-    addBackButton(this, () => this.toHub(false));
+    addBackButton(this, () => this.toHub(false)).setY(GAME_HEIGHT - BOT_H / 2);
 
     // Big countdown numbers
     const numStyle = { fontFamily: 'Arial Black, Arial', fontSize: '96px', color: '#ffffff' };

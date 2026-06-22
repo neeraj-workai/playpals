@@ -75,7 +75,7 @@ export class WhackScene extends Phaser.Scene {
 
   private makeHole(x: number, y: number, side: number): void {
     this.add.ellipse(x, y + 16, 58, 22, 0x0a0d14, 1).setStrokeStyle(2, 0x2a3550, 1);
-    const mole = this.add.text(x, y, 'ðŸ¹', { fontSize: '38px' }).setOrigin(0.5).setDepth(5).setVisible(false).setScale(0);
+    const mole = this.add.text(x, y, '🐹', { fontSize: '38px' }).setOrigin(0.5).setDepth(5).setVisible(false).setScale(0);
     mole.setInteractive({ useHandCursor: true });
     const hole: Hole = { x, y, side, active: false, mole };
     mole.on('pointerdown', () => {
@@ -155,7 +155,7 @@ export class WhackScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        subtitle: `${this.p1} â€“ ${this.p2}`,
+        subtitle: `${this.p1} – ${this.p2}`,
         onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
         onHome: () => this.toHub(true),
       }),

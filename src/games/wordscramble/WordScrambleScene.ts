@@ -58,7 +58,7 @@ export class WordScrambleScene extends Phaser.Scene {
     this.p2ScoreText = this.add.text(GAME_WIDTH - 16, TOP_H / 2, '0', scoreStyle).setOrigin(1, 0.5).setAngle(180).setDepth(5);
     this.p1ScoreText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - BOT_H / 2, '0', scoreStyle).setOrigin(1, 0.5).setDepth(5);
 
-    addBackButton(this, () => this.toHub(false));
+    addBackButton(this, () => this.toHub(false)).setY(GAME_HEIGHT - BOT_H / 2);
 
     this.statusText = this.add.text(GAME_WIDTH / 2, MID_Y, '', {
       fontFamily: 'Arial Black, Arial', fontSize: '18px', color: '#ffffff', align: 'center',
@@ -119,9 +119,10 @@ export class WordScrambleScene extends Phaser.Scene {
       p1cont.on('pointerdown', () => this.tapLetter(i, 1, p1bg, p1txt));
       this.p1LetterBtns.push(p1cont);
 
+      const p2x = startX + (3 - i) * (tileW + gap);
       const p2bg = this.add.rectangle(0, 0, tileW, tileH, COLORS.p2, 0.25).setStrokeStyle(2, COLORS.p2, 0.7);
       const p2txt = this.add.text(0, 0, letter, { fontFamily: 'Arial Black, Arial', fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
-      const p2cont = this.add.container(x, p2TileY, [p2bg, p2txt]).setDepth(10).setSize(tileW, tileH).setAngle(180).setInteractive({ useHandCursor: true });
+      const p2cont = this.add.container(p2x, p2TileY, [p2bg, p2txt]).setDepth(10).setSize(tileW, tileH).setAngle(180).setInteractive({ useHandCursor: true });
       p2cont.on('pointerdown', () => this.tapLetter(i, 2, p2bg, p2txt));
       this.p2LetterBtns.push(p2cont);
     });

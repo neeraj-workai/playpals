@@ -158,7 +158,7 @@ export class TicTacToeScene extends Phaser.Scene {
     let label: string;
     let color: number;
     if (this.mode === 'ai') {
-      label = this.current === 1 ? 'Your turn  (X)' : 'CPU thinkingâ€¦';
+      label = this.current === 1 ? 'Your turn  (X)' : 'CPU thinking…';
     } else {
       label = this.current === 1 ? 'P1 turn  (X)' : 'P2 turn  (O)';
     }
