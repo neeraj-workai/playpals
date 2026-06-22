@@ -5,6 +5,7 @@ import { FamilyProfiles } from '../profile/FamilyProfiles';
 import { PALETTE } from '../design';
 import { audio } from '../audio/AudioManager';
 import { mountOnStage } from '../ui/Stage';
+import { NavBack } from '../ui/NavBack';
 import { ensureSoleActiveScene } from '../ui/NavGuard';
 import { FONT_DISPLAY, FONT_BODY, INK, INK_DIM, BLOB_RADIUS, cssGradient, P2_RAMP, INK_TERTIARY } from '../design';
 
@@ -54,7 +55,9 @@ export class PassPlayScene extends Phaser.Scene {
     back.style.cssText =
       'width:46px;height:46px;border-radius:50%;border:none;background:#fff;box-shadow:0 6px 14px rgba(74,68,102,.08);' +
       'font-size:19px;cursor:pointer;color:' + INK + ';float:left;';
-    back.addEventListener('click', () => { audio.click(); this.scene.start('GameDetail', { key: def.key }); });
+    const goBack = (): void => { audio.click(); this.scene.start('GameDetail', { key: def.key }); };
+    back.addEventListener('click', goBack);
+    NavBack.register(goBack);
 
     const clear = document.createElement('div');
     clear.style.clear = 'both';

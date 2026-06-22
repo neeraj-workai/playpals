@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Profile, AVATARS } from '../profile/Profile';
 import { audio } from '../audio/AudioManager';
 import { mountOnStage } from './Stage';
+import { NavBack } from './NavBack';
 import { FONT_BODY, INK, hex2css } from '../design';
 
 export type NavKey = 'home' | 'leaderboard' | 'profile' | 'settings';
@@ -67,6 +68,8 @@ export function createShell(scene: Phaser.Scene, active: NavKey): Shell {
 
   root.append(content, nav);
   mountOnStage(scene, root);
+  // Shell scenes (Hub, Profile, Leaderboard, Settings) all go back to Hub.
+  NavBack.register(() => scene.scene.start('Hub'));
   return { root, content };
 }
 

@@ -5,6 +5,7 @@ import { FamilyProfiles } from '../profile/FamilyProfiles';
 import { Session } from '../session/Session';
 import { audio } from '../audio/AudioManager';
 import { mountOnStage } from '../ui/Stage';
+import { NavBack } from '../ui/NavBack';
 import { ensureSoleActiveScene } from '../ui/NavGuard';
 import { PALETTE, FONT_DISPLAY, FONT_BODY, INK, INK_DIM, INK_LABEL, BLOB_RADIUS, cssGradient, hex2css } from '../design';
 
@@ -38,7 +39,9 @@ export class GameDetailScene extends Phaser.Scene {
     back.style.cssText =
       'flex:none;width:42px;height:42px;border-radius:50%;border:none;background:#fff;' +
       'box-shadow:0 6px 14px rgba(74,68,102,.08);font-size:18px;cursor:pointer;color:' + INK + ';margin-bottom:8px;';
-    back.addEventListener('click', () => { audio.click(); this.scene.start('Hub'); });
+    const goBack = (): void => { audio.click(); this.scene.start('Hub'); };
+    back.addEventListener('click', goBack);
+    NavBack.register(goBack);
 
     // hero card
     const hero = document.createElement('div');
@@ -79,7 +82,7 @@ export class GameDetailScene extends Phaser.Scene {
     howto.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;';
     def.howto.forEach((s) => {
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:6px 12px;box-shadow:0 4px 12px rgba(80,60,140,.05);';
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:8px 12px;box-shadow:0 4px 12px rgba(80,60,140,.05);';
       row.innerHTML =
         '<div style="flex:none;width:30px;height:30px;border-radius:50%;background:' + def.cssGrad + ';color:#fff;font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">' + s.n + '</div>' +
         '<div style="font-weight:700;font-size:13px;color:' + INK + ';line-height:1.2">' + s.t + '</div>';
@@ -93,11 +96,14 @@ export class GameDetailScene extends Phaser.Scene {
     const seg2 = segBtn('2P · Pass & play');
     seg.append(seg1, seg2);
 
-    // P1 + P2 picker sections (visible only in 2P mode)
+    // P1 + P2 picker sections side-by-side (visible only in 2P mode)
+    const pickerRow = document.createElement('div');
+    pickerRow.style.cssText = 'flex:none;display:flex;gap:10px;margin-top:8px;';
     const p1Section = document.createElement('div');
-    p1Section.style.cssText = 'flex:none;margin-top:8px;';
+    p1Section.style.cssText = 'flex:1;min-width:0;';
     const p2Section = document.createElement('div');
-    p2Section.style.cssText = 'flex:none;margin-top:6px;';
+    p2Section.style.cssText = 'flex:1;min-width:0;';
+    pickerRow.append(p1Section, p2Section);
 
     function renderP1Picker() {
       p1Section.innerHTML = '';
@@ -195,7 +201,7 @@ export class GameDetailScene extends Phaser.Scene {
       else this.scene.start(def.scene, { mode });
     });
 
-    root.append(back, hero, statsRow, howtoTitle, howto, seg, p1Section, p2Section, start);
+    root.append(back, hero, statsRow, howtoTitle, howto, seg, pickerRow, start);
     mountOnStage(this, root);
     this.root = root;
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.root = undefined; });

@@ -4,6 +4,7 @@ import { Ads } from '../ads/AdManager';
 import { Profile } from '../profile/Profile';
 import { audio } from '../audio/AudioManager';
 import { injectDesignKeyframes } from '../design.css';
+import { NavBack } from '../ui/NavBack';
 
 // Generates the few shared textures the physics games need (white circles we
 // tint per player), registers the session, then opens the hub.
@@ -20,6 +21,16 @@ export class BootScene extends Phaser.Scene {
     audio.setMuted(Storage.getBool('muted'));
     injectDesignKeyframes();
     Ads.setSessionCount(Storage.bumpSessions());
+
+    // Intercept the browser/OS back gesture so it navigates within the game
+    // rather than leaving the page. Each scene registers its own handler via
+    // NavBack.register(); we re-push a state after every popstate so the
+    // interception is permanent for the session.
+    history.pushState({}, '');
+    window.addEventListener('popstate', () => {
+      history.pushState({}, '');
+      NavBack.go();
+    });
 
     // First launch with no player profile → onboarding; otherwise straight to the hub.
     const next = Profile.isRegistered() ? 'Hub' : 'Onboarding';
