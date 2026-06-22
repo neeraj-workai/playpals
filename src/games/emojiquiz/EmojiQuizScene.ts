@@ -51,7 +51,7 @@ export class EmojiQuizScene extends Phaser.Scene {
     this.p2ScoreText = this.add.text(GAME_WIDTH - 16, TOP_H / 2, '0', scoreStyle).setOrigin(1, 0.5).setAngle(180).setDepth(5);
     this.p1ScoreText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - BOT_H / 2, '0', scoreStyle).setOrigin(1, 0.5).setDepth(5);
 
-    addBackButton(this, () => this.toHub(false));
+    addBackButton(this, () => this.toHub(false)).setY(GAME_HEIGHT - BOT_H / 2);
 
     this.statusText = this.add.text(GAME_WIDTH / 2, TOP_H + 18, '', {
       fontFamily: 'Arial Black, Arial', fontSize: '16px', color: '#ffffffcc', align: 'center',

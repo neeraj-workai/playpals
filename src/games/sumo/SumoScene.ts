@@ -162,7 +162,7 @@ export class SumoScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        subtitle: `${this.p1} â€“ ${this.p2}`,
+        subtitle: `${this.p1} – ${this.p2}`,
         onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
         onHome: () => this.toHub(true),
       }),

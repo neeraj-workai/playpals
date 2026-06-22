@@ -55,7 +55,7 @@ export class BombDiffuseScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH - 16, TOP_H / 2, 'Tap your digits!', { fontFamily: 'Arial', fontSize: '12px', color: '#ffffffaa' }).setOrigin(1, 0.5).setAngle(180).setDepth(5);
     this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - BOT_H / 2, 'Tap your digits!', { fontFamily: 'Arial', fontSize: '12px', color: '#ffffffaa' }).setOrigin(1, 0.5).setDepth(5);
 
-    addBackButton(this, () => this.toHub(false));
+    addBackButton(this, () => this.toHub(false)).setY(GAME_HEIGHT - BOT_H / 2);
 
     // Bomb emoji + timer in center
     this.bombText = this.add.text(GAME_WIDTH / 2, MID_Y - 32, '💣', { fontSize: '60px' }).setOrigin(0.5).setDepth(5);

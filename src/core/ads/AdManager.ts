@@ -139,6 +139,10 @@ class AdManager {
    */
   private simulateInterstitial(): Promise<void> {
     return new Promise((resolve) => {
+      // Pause Phaser so no game logic runs behind the ad overlay
+      const g = (window as unknown as Record<string, { pause?(): void; resume?(): void }>).__game;
+      g?.pause?.();
+
       const SECS = 5;
       const ov = document.createElement('div');
       ov.style.cssText =
@@ -192,6 +196,7 @@ class AdManager {
       closeBtn.onclick = () => {
         window.clearInterval(t);
         ov.remove();
+        g?.resume?.();
         resolve();
       };
     });

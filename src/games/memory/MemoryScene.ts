@@ -8,7 +8,7 @@ import { GameMode } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
-const FACES = ['ðŸŽ', 'ðŸŒ', 'ðŸ‡', 'ðŸ’', 'ðŸ¥', 'ðŸ‘', 'ðŸ“', 'ðŸ¥¥', 'ðŸŒŸ', 'ðŸ‰', 'ðŸ¥‘', 'ðŸ«'];
+const FACES = ['🍎', '🍌', '🍇', '🍒', '🥝', '🍑', '🍓', '🥥', '🌟', '🍉', '🥑', '🫐'];
 const COUNT = 24;
 const CARD = 64;
 const GAP = 7;
@@ -217,7 +217,7 @@ export class MemoryScene extends Phaser.Scene {
     if (this.over) return;
     const color = this.current === 1 ? COLORS.p1 : COLORS.p2;
     let label: string;
-    if (this.mode === 'ai') label = this.current === 1 ? 'Your turn' : 'CPU thinkingâ€¦';
+    if (this.mode === 'ai') label = this.current === 1 ? 'Your turn' : 'CPU thinking…';
     else label = this.current === 1 ? 'P1 turn' : 'P2 turn';
     this.turnText.setText(label).setColor('#' + color.toString(16).padStart(6, '0'));
   }
@@ -245,7 +245,7 @@ export class MemoryScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        subtitle: `${this.p1} â€“ ${this.p2}`,
+        subtitle: `${this.p1} – ${this.p2}`,
         onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
         onHome: () => this.toHub(true),
       }),
