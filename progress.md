@@ -53,6 +53,19 @@
 
 ---
 
+| 47 | Family Profiles system | FamilyProfiles.ts, Session.ts, Storage win/weekly tracking |
+| 48 | Settings — Family Players management | Add/edit/delete family members inline |
+| 49 | GameDetail — P2 player picker | Select family member as Player 2 before 2P game |
+| 50 | PassPlay — real P2 info | Shows family member avatar/name if selected |
+| 51 | Leaderboard — real weekly scores | All family players ranked; prev week champion; resets Monday |
+| 52 | Profile — player selector + real badges | View any player's stats; badges from actual win counts |
+| 53 | ResultOverlay — auto win recording | Reads Session to record wins per player after each match |
+| 54 | Fix: CoinToss coin rendering | Replaced 🪙 emoji (not on Android <11) with Phaser Arc gold circle |
+| 55 | Fix: BubblePop bubble rendering | Replaced 🫧 emoji (Android 12+ only) with Phaser Arc circles |
+| 56 | Fix: white space in game scenes | Body + canvas backgroundColor = GAME_ARENA_BG (#1d1a2e); no light edges |
+| 57 | Fix: Stage scaling alignment | applyFit now uses #app div dimensions to match Phaser Scale.FIT reference |
+| 58 | Write progress.md | Full task history with completed + pending |
+
 ## In Progress / Pending
 
 | Task | Status | Notes |
@@ -62,6 +75,38 @@
 | iOS build | **Blocked** | Requires macOS + Xcode. Use Codemagic free tier or Mac cloud builder once a game earns it. |
 | AdMob real ad unit IDs | **Pending** | Test IDs wired in dev. Swap to real IDs in `src/core/config.ts` for production release builds only. |
 | Store listings (Play + App Store) | **Not started** | Icon, screenshots, 15–30s preview video, ASO keywords, privacy policy URL. |
+| New game selection | **Awaiting user decision** | 10 games proposed — see progress.md game proposals section. |
+
+## Proposed New Games (awaiting selection)
+
+| ID | Game | Mechanic | Effort |
+|---|---|---|---|
+| A | Emoji Quiz | Flash emoji sequence, tap the match — tests visual memory | Easy |
+| B | Countdown Duel | Tap to count up, race to target — pure speed | Easy |
+| C | Slice It Fair | Drag a cut line to split shapes 50/50 — precision | Medium |
+| D | Colour Flood | Flood-fill grid from corners — strategy | Medium |
+| E | Word Scramble Race | Unscramble 4-letter words fastest — word game | Medium |
+| F | Gravity Pong | Pong but gravity alternates every 5s — classic with twist | Medium |
+| G | Bomb Diffuse | Co-op: each player sees half the code, must communicate | Easy |
+| H | Dice Duel | Roll dice, higher total wins round — luck/combos | Very easy |
+| I | Flip the Grid | Flip tiles to your colour on a 4×4 board — strategy | Medium |
+| J | Reaction Chain | Simon-style flash sequence, race to repeat it — reflex | Medium |
+
+## Proposed New Features (not implementing yet)
+
+- Daily Challenge (1 game/day, 3× points, resets midnight)
+- Tournament Mode (family bracket, auto-tracked)
+- Streaks & Daily Login (flame counter on Hub)
+- Game Collections / Packs (themed groupings)
+- Player Avatar Editor (freehand blob drawing)
+- Game History Log (last 20 match results)
+- Parental Timer lock screen with PIN
+- Cloud Sync (Firebase Auth + Firestore)
+- Game Ratings (1-tap Fun/OK/Meh after each match)
+- Seasonal Events (holiday Hub themes + bonus games)
+- Achievements System (cross-game goals)
+- Confetti uses your profile colour/avatar
+- Split-Screen real-time 2P mode (both tap simultaneously)
 
 ---
 
