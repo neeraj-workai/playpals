@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GAMES } from '../config';
 import { Profile, AVATARS } from '../profile/Profile';
+import { FamilyProfiles } from '../profile/FamilyProfiles';
+import { PALETTE } from '../design';
 import { audio } from '../audio/AudioManager';
 import { mountOnStage } from '../ui/Stage';
 import { ensureSoleActiveScene } from '../ui/NavGuard';
@@ -12,13 +14,15 @@ import { FONT_DISPLAY, FONT_BODY, INK, INK_DIM, BLOB_RADIUS, cssGradient, P2_RAM
 export class PassPlayScene extends Phaser.Scene {
   private root?: HTMLDivElement;
   private gameKey = '';
+  private player2Id = '';
 
   constructor() {
     super('PassPlay');
   }
 
-  init(data: { key?: string }): void {
+  init(data: { key?: string; player2Id?: string }): void {
     this.gameKey = data?.key ?? GAMES[0].key;
+    this.player2Id = data?.player2Id ?? '';
   }
 
   create(): void {
@@ -27,6 +31,12 @@ export class PassPlayScene extends Phaser.Scene {
     const pal = Profile.pal();
     const name = Profile.name();
     const avatar = AVATARS[Profile.get()?.avatarIdx ?? 0];
+
+    // Resolve Player 2 info — real family member or anonymous
+    const p2Member = this.player2Id ? FamilyProfiles.getById(this.player2Id) : undefined;
+    const p2Avatar = p2Member ? AVATARS[p2Member.avatarIdx] : '🐲';
+    const p2Name = p2Member ? p2Member.name : 'Player 2';
+    const p2Grad = p2Member ? cssGradient(PALETTE[p2Member.colorIdx]) : cssGradient(P2_RAMP);
 
     const root = document.createElement('div');
     root.style.cssText =
@@ -58,7 +68,7 @@ export class PassPlayScene extends Phaser.Scene {
     const vs = document.createElement('div');
     vs.style.cssText = `font-family:${FONT_DISPLAY};font-weight:800;font-size:22px;color:${INK_TERTIARY};`;
     vs.textContent = 'VS';
-    const p2Card = playerCard({ avatar: '🐲', name: 'Player 2', sub: 'Pass it over!', grad: cssGradient(P2_RAMP) });
+    const p2Card = playerCard({ avatar: p2Avatar, name: p2Name, sub: 'Pass it over!', grad: p2Grad });
     row.append(p1Card, vs, p2Card);
 
     // status pill
@@ -68,7 +78,7 @@ export class PassPlayScene extends Phaser.Scene {
       '<span style="position:relative;width:10px;height:10px">' +
       '<span style="position:absolute;inset:0;border-radius:50%;background:#2FB875;animation:pp-pulse 1.6s ease-out infinite"></span>' +
       '<span style="position:absolute;inset:0;border-radius:50%;background:#2FB875"></span></span>' +
-      `<span style="font-weight:800;font-size:13.5px;color:${INK}">${name}, you go first!</span>`;
+      `<span style="font-weight:800;font-size:13.5px;color:${INK}">${name} goes first!</span>`;
     const pillWrap = document.createElement('div');
     pillWrap.style.cssText = 'text-align:center;';
     pillWrap.append(pill);

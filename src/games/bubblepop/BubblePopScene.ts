@@ -10,15 +10,20 @@ import { setupSceneScale } from '../../core/scale';
 
 // Split-screen bubble popping race (20s). Bubbles float up on each side;
 // tap to pop. Most pops wins. CPU auto-pops with a miss chance.
-const MID = 366;
+const MID = GAME_HEIGHT / 2;  // true midpoint
 const GAME_SECS = 20;
-const SPAWN_MS = 360;
-const RISE_PX_S = 90;
-const HUD_TOP = 72;
-const HUD_BOT = 30;
+const SPAWN_MS = 400;
+const RISE_PX_S = 85;
+const HUD_TOP = 70;
+const HUD_BOT = 28;
+const BUBBLE_R = 18;
+
+// Palette for coloured bubbles
+const BUBBLE_COLORS = [0x74C0FC, 0xF8A5C2, 0xB9F5D0, 0xFFD8A8, 0xD0BFFF];
 
 interface Bubble {
-  go: Phaser.GameObjects.Text;
+  arc: Phaser.GameObjects.Arc;
+  shine: Phaser.GameObjects.Arc;
   side: number;
   vy: number;
   popped: boolean;
@@ -37,9 +42,7 @@ export class BubblePopScene extends Phaser.Scene {
   private spawnTimer?: Phaser.Time.TimerEvent;
   private clockTimer?: Phaser.Time.TimerEvent;
 
-  constructor() {
-    super('BubblePop');
-  }
+  constructor() { super('BubblePop'); }
 
   init(data: { mode?: GameMode }): void {
     this.mode = data?.mode ?? 'ai';
@@ -48,48 +51,61 @@ export class BubblePopScene extends Phaser.Scene {
   create(): void {
     ensureSoleActiveScene(this);
     setupSceneScale(this);
-    this.p1 = 0;
-    this.p2 = 0;
+    this.p1 = 0; this.p2 = 0;
     this.timeLeft = GAME_SECS;
     this.over = false;
     this.bubbles = [];
     this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
 
+    // Zone backgrounds
     this.add.rectangle(GAME_WIDTH / 2, (HUD_TOP + MID) / 2, GAME_WIDTH, MID - HUD_TOP, COLORS.p2, 0.10);
     this.add.rectangle(GAME_WIDTH / 2, (MID + GAME_HEIGHT - HUD_BOT) / 2, GAME_WIDTH, GAME_HEIGHT - HUD_BOT - MID, COLORS.p1, 0.10);
 
+    // Divider line
+    this.add.rectangle(GAME_WIDTH / 2, MID, GAME_WIDTH, 2, 0xffffff, 0.15);
+
     addBackButton(this, () => this.toHub(false));
-    this.p2Text = this.add.text(40, 40, '0', { fontFamily: 'Arial Black, Arial', fontSize: '24px', color: '#' + COLORS.p2.toString(16) }).setOrigin(0.5).setDepth(10);
-    this.p1Text = this.add.text(40, GAME_HEIGHT - 36, '0', { fontFamily: 'Arial Black, Arial', fontSize: '24px', color: '#' + COLORS.p1.toString(16) }).setOrigin(0.5).setDepth(10);
-    this.add.text(40, 60, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
-    this.add.text(40, GAME_HEIGHT - 58, 'P1', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
-    this.timeText = this.add.text(GAME_WIDTH / 2, MID, `0:${GAME_SECS}`, { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5).setDepth(10);
+
+    this.p2Text = this.add.text(44, 38, '0', { fontFamily: 'Arial Black, Arial', fontSize: '24px', color: '#' + COLORS.p2.toString(16) }).setOrigin(0.5).setDepth(10);
+    this.p1Text = this.add.text(44, GAME_HEIGHT - 34, '0', { fontFamily: 'Arial Black, Arial', fontSize: '24px', color: '#' + COLORS.p1.toString(16) }).setOrigin(0.5).setDepth(10);
+    this.add.text(44, 58, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
+    this.add.text(44, GAME_HEIGHT - 56, 'P1', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
+    this.timeText = this.add.text(GAME_WIDTH / 2, MID, '0:20', { fontFamily: 'Arial Black, Arial', fontSize: '18px', color: '#ffffff' }).setOrigin(0.5).setDepth(10);
 
     this.spawnTimer = this.time.addEvent({ delay: SPAWN_MS, loop: true, callback: () => this.spawn() });
-    this.clockTimer = this.time.addEvent({ delay: 1000, loop: true, callback: () => this.tickClock() });
+    this.clockTimer = this.time.addEvent({ delay: 1000,    loop: true, callback: () => this.tickClock() });
   }
 
   private spawn(): void {
     if (this.over) return;
     for (const side of [1, 2]) {
-      const startY = side === 1 ? GAME_HEIGHT - HUD_BOT - 20 : MID - 20;
-      const endY = side === 1 ? MID + 30 : HUD_TOP + 30;
-      const x = Phaser.Math.Between(50, GAME_WIDTH - 50);
-      const go = this.add.text(x, startY, '🫧', { fontSize: '38px' }).setOrigin(0.5).setDepth(5);
-      go.setInteractive({ useHandCursor: true });
-      const bubble: Bubble = { go, side, vy: -RISE_PX_S, popped: false };
-      go.on('pointerdown', () => {
+      const startY = side === 1 ? GAME_HEIGHT - HUD_BOT - BUBBLE_R : MID - BUBBLE_R;
+      const endY   = side === 1 ? MID + BUBBLE_R * 2 : HUD_TOP + BUBBLE_R * 2;
+      const x = Phaser.Math.Between(BUBBLE_R + 20, GAME_WIDTH - BUBBLE_R - 20);
+      const color = BUBBLE_COLORS[Phaser.Math.Between(0, BUBBLE_COLORS.length - 1)];
+
+      const arc = this.add.arc(x, startY, BUBBLE_R, 0, 360, false, color, 0.82).setDepth(5);
+      // small white shine highlight
+      const shine = this.add.arc(x - BUBBLE_R * 0.3, startY - BUBBLE_R * 0.3, BUBBLE_R * 0.3, 0, 360, false, 0xffffff, 0.5).setDepth(6);
+
+      arc.setInteractive({ hitArea: new Phaser.Geom.Circle(0, 0, BUBBLE_R), hitAreaCallback: Phaser.Geom.Circle.Contains, useHandCursor: true });
+
+      const bubble: Bubble = { arc, shine, side, vy: -RISE_PX_S, popped: false };
+
+      arc.on('pointerdown', () => {
         if (this.over || bubble.popped) return;
         if (bubble.side === 2 && this.mode === 'ai') return; // CPU's lane
         this.pop(bubble);
       });
       this.bubbles.push(bubble);
-      // CPU auto-pops with a reaction delay + small miss chance
+
+      // CPU auto-pops with reaction delay + miss chance
       if (this.mode === 'ai' && side === 2) {
-        const delay = Phaser.Math.Between(350, 950);
+        const delay = Phaser.Math.Between(300, 900);
         this.time.delayedCall(delay, () => { if (!bubble.popped && Math.random() < 0.78) this.pop(bubble); });
       }
-      // schedule cleanup at the top
+
+      // Clean up bubble when it escapes the top of its zone
       const traverse = Math.abs(endY - startY);
       this.time.delayedCall((traverse / RISE_PX_S) * 1000, () => { if (!bubble.popped) this.escape(bubble); });
     }
@@ -97,7 +113,12 @@ export class BubblePopScene extends Phaser.Scene {
 
   update(_t: number, delta: number): void {
     const dt = delta / 1000;
-    for (const b of this.bubbles) if (!b.popped) b.go.y += b.vy * dt;
+    for (const b of this.bubbles) {
+      if (!b.popped) {
+        b.arc.y   += b.vy * dt;
+        b.shine.y += b.vy * dt;
+      }
+    }
   }
 
   private pop(b: Bubble): void {
@@ -107,15 +128,15 @@ export class BubblePopScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
-    const plus = this.add.text(b.go.x, b.go.y - 8, '+1', { fontFamily: 'Arial Black, Arial', fontSize: '16px', color: '#ffffff' }).setOrigin(0.5).setDepth(8);
-    this.tweens.add({ targets: plus, y: b.go.y - 36, alpha: 0, duration: 380, onComplete: () => plus.destroy() });
-    this.tweens.add({ targets: b.go, scale: 1.6, alpha: 0, duration: 130, onComplete: () => b.go.destroy() });
+    const plus = this.add.text(b.arc.x, b.arc.y - 8, '+1', { fontFamily: 'Arial Black, Arial', fontSize: '15px', color: '#ffffff' }).setOrigin(0.5).setDepth(8);
+    this.tweens.add({ targets: plus, y: b.arc.y - 36, alpha: 0, duration: 380, onComplete: () => plus.destroy() });
+    this.tweens.add({ targets: [b.arc, b.shine], scale: 1.8, alpha: 0, duration: 120, onComplete: () => { b.arc.destroy(); b.shine.destroy(); } });
   }
 
   private escape(b: Bubble): void {
     if (b.popped) return;
     b.popped = true;
-    this.tweens.add({ targets: b.go, alpha: 0, duration: 200, onComplete: () => b.go.destroy() });
+    this.tweens.add({ targets: [b.arc, b.shine], alpha: 0, duration: 180, onComplete: () => { b.arc.destroy(); b.shine.destroy(); } });
   }
 
   private tickClock(): void {
@@ -131,16 +152,9 @@ export class BubblePopScene extends Phaser.Scene {
     const p1won = this.p1 > this.p2;
     const draw = this.p1 === this.p2;
     let title: string;
-    if (draw) {
-      title = 'Draw';
-      audio.bump();
-    } else if (this.mode === 'ai') {
-      title = p1won ? 'You win!' : 'CPU wins';
-      p1won ? audio.win() : audio.lose();
-    } else {
-      title = p1won ? 'Player 1 wins!' : 'Player 2 wins!';
-      audio.win();
-    }
+    if (draw) { title = 'Draw'; audio.bump(); }
+    else if (this.mode === 'ai') { title = p1won ? 'You win!' : 'CPU wins'; p1won ? audio.win() : audio.lose(); }
+    else { title = p1won ? 'Player 1 wins!' : 'Player 2 wins!'; audio.win(); }
     this.time.delayedCall(500, () =>
       showResult(this, {
         title,

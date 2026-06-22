@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { GAMES } from '../config';
 import { Profile, AVATARS } from '../profile/Profile';
+import { FamilyProfiles } from '../profile/FamilyProfiles';
+import { Session } from '../session/Session';
+import { Storage } from '../storage/Storage';
 import { audio } from '../audio/AudioManager';
 import { mountOnStage } from './Stage';
 import { FONT_DISPLAY, FONT_BODY, INK, INK_DIM, PALETTE, BLOB_RADIUS, cssGradient, hex2css, P2_RAMP } from '../design';
@@ -32,6 +35,12 @@ export function showResult(scene: Phaser.Scene, opts: ResultOpts): Phaser.GameOb
   // crude winner detection from the title so we don't need a new API param
   const p1Won = /you win|player 1 wins|p1 wins/i.test(opts.title);
   const isDraw = /draw/i.test(opts.title);
+
+  // Record the win for the appropriate player
+  if (!isDraw) {
+    const winnerId = p1Won ? Session.player1Id : Session.player2Id;
+    if (winnerId) Storage.recordWin(winnerId, Session.gameKey || def?.key);
+  }
 
   const root = document.createElement('div');
   root.style.cssText =
@@ -68,7 +77,11 @@ export function showResult(scene: Phaser.Scene, opts: ResultOpts): Phaser.GameOb
   // score card
   const card = document.createElement('div');
   card.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:14px;margin-top:26px;background:#fff;border-radius:26px;padding:22px;box-shadow:0 10px 22px rgba(80,60,140,.08);';
-  card.append(playerPanel(avatar, name, cssGradient(pal)), scoreText(opts.subtitle || ''), playerPanel('🐲', 'Player 2', cssGradient(P2_RAMP)));
+  const p2Member = Session.player2Id ? FamilyProfiles.getById(Session.player2Id) : undefined;
+  const p2Avatar = p2Member ? AVATARS[p2Member.avatarIdx] : '🐲';
+  const p2Name = p2Member ? p2Member.name : 'Player 2';
+  const p2Grad = p2Member ? cssGradient(PALETTE[p2Member.colorIdx]) : cssGradient(P2_RAMP);
+  card.append(playerPanel(avatar, name, cssGradient(pal)), scoreText(opts.subtitle || ''), playerPanel(p2Avatar, p2Name, p2Grad));
 
   // buttons
   const again = document.createElement('button');

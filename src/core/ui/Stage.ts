@@ -11,7 +11,13 @@ let stage: HTMLDivElement | null = null;
 
 function applyFit(): void {
   if (!stage) return;
-  const s = Math.min(window.innerWidth / GAME_WIDTH, window.innerHeight / GAME_HEIGHT);
+  // Match Phaser's Scale.FIT reference: use #app div size, not raw window size.
+  // On mobile, window.innerHeight can differ from the CSS 100vh used by #app,
+  // causing a 1-2px offset between the canvas and stage layers.
+  const app = document.getElementById('app');
+  const w = app ? app.clientWidth : window.innerWidth;
+  const h = app ? app.clientHeight : window.innerHeight;
+  const s = Math.min(w / GAME_WIDTH, h / GAME_HEIGHT);
   stage.style.transform = `translate(-50%, -50%) scale(${s})`;
 }
 

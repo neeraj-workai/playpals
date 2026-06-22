@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, DPR } from './core/config';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG_HEX, DPR } from './core/config';
 import { BootScene } from './core/scenes/BootScene';
 import { OnboardingScene } from './core/scenes/OnboardingScene';
 import { HubScene } from './core/scenes/HubScene';
@@ -35,7 +35,7 @@ const config: Phaser.Types.Core.GameConfig = {
   // to apply the matching camera zoom so coordinate maths stays logical.
   width: GAME_WIDTH * DPR,
   height: GAME_HEIGHT * DPR,
-  backgroundColor: COLORS.bgHex,
+  backgroundColor: GAME_ARENA_BG_HEX,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
