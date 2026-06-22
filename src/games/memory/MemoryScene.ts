@@ -8,12 +8,12 @@ import { GameMode } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
-const FACES = ['🍎', '🍌', '🍇', '🍒', '🥝', '🍑', '🍓', '🥥'];
-const COUNT = 16;
-const CARD = 72;
-const GAP = 8;
+const FACES = ['🍎', '🍌', '🍇', '🍒', '🥝', '🍑', '🍓', '🥥', '🌟', '🍉', '🥑', '🫐'];
+const COUNT = 24;
+const CARD = 64;
+const GAP = 7;
 const OX = (GAME_WIDTH - (4 * CARD + 3 * GAP)) / 2;
-const OY = 190;
+const OY = 170;
 const AI_MEMORY = 0.78; // chance the CPU remembers a revealed card
 
 interface Card {
