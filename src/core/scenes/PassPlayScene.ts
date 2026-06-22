@@ -100,7 +100,7 @@ export class PassPlayScene extends Phaser.Scene {
 
     function playerCard(o: { avatar: string; name: string; sub: string; grad: string; youTurn?: boolean; badgeBg?: string }): HTMLDivElement {
       const card = document.createElement('div');
-      card.style.cssText = 'flex:1;background:#fff;border-radius:26px;padding:22px 10px;box-shadow:0 10px 22px rgba(80,60,140,.08);position:relative;';
+      card.style.cssText = 'flex:1;background:#fff;border-radius:26px;padding:22px 10px;box-shadow:0 10px 22px rgba(80,60,140,.08);position:relative;overflow:visible;';
       if (o.youTurn) {
         const badge = document.createElement('div');
         badge.textContent = 'YOUR TURN';

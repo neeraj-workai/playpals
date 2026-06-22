@@ -47,22 +47,25 @@ export class QuickDrawScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
 
     const topLabel = this.mode === 'ai' ? 'CPU' : 'P2';
-    this.topPanel = this.add.rectangle(GAME_WIDTH / 2, 212, GAME_WIDTH, 296, NEUTRAL, 1);
+    this.topPanel = this.add.rectangle(GAME_WIDTH / 2, 188, GAME_WIDTH, 296, NEUTRAL, 1);
     this.botPanel = this.add.rectangle(GAME_WIDTH / 2, 536, GAME_WIDTH, 328, NEUTRAL, 1);
 
-    this.add.text(GAME_WIDTH / 2, 110, topLabel, { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5).setAngle(180).setDepth(5);
-    this.topScore = this.add.text(GAME_WIDTH / 2, 150, '0', { fontFamily: 'Arial Black, Arial', fontSize: '40px', color: '#ffffff' }).setOrigin(0.5).setAngle(180).setDepth(5);
+    this.add.text(GAME_WIDTH / 2, 86, topLabel, { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5).setAngle(180).setDepth(5);
+    this.topScore = this.add.text(GAME_WIDTH / 2, 126, '0', { fontFamily: 'Arial Black, Arial', fontSize: '40px', color: '#ffffff' }).setOrigin(0.5).setAngle(180).setDepth(5);
     this.add.text(GAME_WIDTH / 2, 660, 'P1', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5).setDepth(5);
     this.botScore = this.add.text(GAME_WIDTH / 2, 620, '0', { fontFamily: 'Arial Black, Arial', fontSize: '40px', color: '#ffffff' }).setOrigin(0.5).setDepth(5);
 
     this.status = this.add
-      .text(GAME_WIDTH / 2, 372, '', { fontFamily: 'Arial Black, Arial', fontSize: '22px', color: '#ffffff', align: 'center' })
+      .text(GAME_WIDTH / 2, 352, '', { fontFamily: 'Arial Black, Arial', fontSize: '22px', color: '#ffffff', align: 'center' })
       .setOrigin(0.5)
       .setDepth(10);
 
     this.botPanel.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.onTap(1));
     if (this.mode === '2p') {
-      this.topPanel.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.onTap(2));
+      this.topPanel.setInteractive({ useHandCursor: true }).on('pointerdown', (ptr: Phaser.Input.Pointer) => {
+        if (ptr.worldY < 48) return; // back button zone
+        this.onTap(2);
+      });
     }
 
     addBackButton(this, () => this.toHub(false));

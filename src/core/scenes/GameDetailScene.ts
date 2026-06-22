@@ -42,8 +42,8 @@ export class GameDetailScene extends Phaser.Scene {
     // hero card
     const hero = document.createElement('div');
     hero.style.cssText =
-      'flex:none;border-radius:24px;padding:14px;text-align:center;box-shadow:0 8px 20px rgba(80,60,140,.06);' +
-      'background:' + def.tint + ';animation:pp-pop .35s ease;';
+      'flex:none;border-radius:24px;padding:10px;text-align:center;box-shadow:0 8px 20px rgba(80,60,140,.06);' +
+      'background:' + def.tint + ';animation:pp-pop .35s ease;overflow:visible;';
     const blob = document.createElement('div');
     blob.style.cssText =
       'width:76px;height:76px;border-radius:36% 64% 60% 40% / 56% 42% 58% 44%;' +
@@ -72,13 +72,13 @@ export class GameDetailScene extends Phaser.Scene {
 
     // howto
     const howtoTitle = document.createElement('div');
-    howtoTitle.style.cssText = 'flex:none;font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:15px;color:' + INK + ';margin:10px 0 6px;';
+    howtoTitle.style.cssText = 'flex:none;font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:15px;color:' + INK + ';margin:8px 0 4px;';
     howtoTitle.textContent = 'How to play';
     const howto = document.createElement('div');
-    howto.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:6px;';
+    howto.style.cssText = 'flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;';
     def.howto.forEach((s) => {
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:9px 12px;box-shadow:0 4px 12px rgba(80,60,140,.05);';
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:6px 12px;box-shadow:0 4px 12px rgba(80,60,140,.05);';
       row.innerHTML =
         '<div style="flex:none;width:30px;height:30px;border-radius:50%;background:' + def.cssGrad + ';color:#fff;font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">' + s.n + '</div>' +
         '<div style="font-weight:700;font-size:13px;color:' + INK + ';line-height:1.2">' + s.t + '</div>';
