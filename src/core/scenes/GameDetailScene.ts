@@ -23,6 +23,7 @@ export class GameDetailScene extends Phaser.Scene {
     const def = GAMES.find((g) => g.key === this.gameKey) ?? GAMES[0];
     let mode: 'ai' | '2p' = '2p';
     let selectedP2Id = '';   // empty = anonymous Player 2
+    let selectedP1Id = 'main'; // 'main' = device owner, else a family member id
 
     const root = document.createElement('div');
     root.style.cssText =
@@ -92,9 +93,26 @@ export class GameDetailScene extends Phaser.Scene {
     const seg2 = segBtn('2P · Pass & play');
     seg.append(seg1, seg2);
 
-    // P2 picker section (visible only in 2P mode)
+    // P1 + P2 picker sections (visible only in 2P mode)
+    const p1Section = document.createElement('div');
+    p1Section.style.cssText = 'flex:none;margin-top:8px;';
     const p2Section = document.createElement('div');
-    p2Section.style.cssText = 'flex:none;margin-top:8px;';
+    p2Section.style.cssText = 'flex:none;margin-top:6px;';
+
+    function renderP1Picker() {
+      p1Section.innerHTML = '';
+      if (mode !== '2p') return;
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:11px;color:' + INK_LABEL + ';font-weight:800;letter-spacing:1px;margin-bottom:7px;';
+      lbl.textContent = 'SELECT PLAYER 1';
+      p1Section.append(lbl);
+      const chips = document.createElement('div');
+      chips.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+      const mainP = Profile.get();
+      chips.append(playerChip('main', AVATARS[mainP?.avatarIdx ?? 0], Profile.name(), Profile.pal(), true));
+      FamilyProfiles.list().forEach(m => chips.append(playerChip(m.id, AVATARS[m.avatarIdx], m.name, PALETTE[m.colorIdx], true)));
+      p1Section.append(chips);
+    }
 
     function renderP2Picker() {
       p2Section.innerHTML = '';
@@ -109,14 +127,14 @@ export class GameDetailScene extends Phaser.Scene {
       chips.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
 
       // "Anyone" chip = anonymous P2
-      chips.append(playerChip('', '🐲', 'Player 2'));
-      members.forEach(m => chips.append(playerChip(m.id, AVATARS[m.avatarIdx], m.name, PALETTE[m.colorIdx])));
+      chips.append(playerChip('', '🐲', 'Player 2', undefined, false));
+      members.forEach(m => chips.append(playerChip(m.id, AVATARS[m.avatarIdx], m.name, PALETTE[m.colorIdx], false)));
       p2Section.append(chips);
     }
 
-    function playerChip(id: string, emoji: string, name: string, pal?: typeof PALETTE[0]): HTMLButtonElement {
+    function playerChip(id: string, emoji: string, name: string, pal: typeof PALETTE[0] | undefined, isP1: boolean): HTMLButtonElement {
       const b = document.createElement('button');
-      const selected = selectedP2Id === id;
+      const selected = isP1 ? selectedP1Id === id : selectedP2Id === id;
       const grad = pal ? cssGradient(pal) : 'linear-gradient(135deg,#B8ADFF,#9775FA)';
       b.style.cssText =
         'display:flex;align-items:center;gap:6px;border:none;border-radius:14px;padding:6px 10px;cursor:pointer;' +
@@ -131,15 +149,15 @@ export class GameDetailScene extends Phaser.Scene {
       nm.textContent = name;
       b.append(av, nm);
       b.addEventListener('click', () => {
-        selectedP2Id = id;
+        if (isP1) selectedP1Id = id; else selectedP2Id = id;
         audio.click();
-        renderP2Picker();
+        if (isP1) renderP1Picker(); else renderP2Picker();
       });
       return b;
     }
 
-    seg1.addEventListener('click', () => { mode = 'ai'; selectedP2Id = ''; styleSeg(); renderP2Picker(); audio.click(); });
-    seg2.addEventListener('click', () => { mode = '2p'; styleSeg(); renderP2Picker(); audio.click(); });
+    seg1.addEventListener('click', () => { mode = 'ai'; selectedP1Id = 'main'; selectedP2Id = ''; styleSeg(); renderP1Picker(); renderP2Picker(); audio.click(); });
+    seg2.addEventListener('click', () => { mode = '2p'; styleSeg(); renderP1Picker(); renderP2Picker(); audio.click(); });
 
     function segBtn(label: string): HTMLButtonElement {
       const b = document.createElement('button');
@@ -158,6 +176,7 @@ export class GameDetailScene extends Phaser.Scene {
       });
     }
     styleSeg();
+    renderP1Picker();
     renderP2Picker();
 
     // start button
@@ -171,16 +190,15 @@ export class GameDetailScene extends Phaser.Scene {
     start.addEventListener('click', () => {
       audio.click();
       // Always set session so ResultOverlay can record wins
-      Session.setGame(def.key, 'main', mode === '2p' ? selectedP2Id : '');
-      if (mode === '2p') this.scene.start('PassPlay', { key: def.key, player2Id: selectedP2Id });
+      Session.setGame(def.key, mode === '2p' ? selectedP1Id : 'main', mode === '2p' ? selectedP2Id : '');
+      if (mode === '2p') this.scene.start('PassPlay', { key: def.key, player1Id: selectedP1Id, player2Id: selectedP2Id });
       else this.scene.start(def.scene, { mode });
     });
 
-    root.append(back, hero, statsRow, howtoTitle, howto, seg, p2Section, start);
+    root.append(back, hero, statsRow, howtoTitle, howto, seg, p1Section, p2Section, start);
     mountOnStage(this, root);
     this.root = root;
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.root = undefined; });
 
-    void Profile; void AVATARS; void INK_LABEL;
   }
 }
