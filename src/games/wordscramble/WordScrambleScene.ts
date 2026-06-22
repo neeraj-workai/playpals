@@ -154,7 +154,9 @@ export class WordScrambleScene extends Phaser.Scene {
     if (letterBtns[idx].alpha < 0.4) return; // already used
     letterBtns[idx].setAlpha(0.3);
     answer.push(this.scrambled[idx]);
-    answerTexts[answer.length - 1].setText(this.scrambled[idx]);
+    // P2 is rotated 180°: fill slots right-to-left on screen so they appear L→R from P2's view
+    const slotIdx = player === 2 ? (3 - (answer.length - 1)) : (answer.length - 1);
+    answerTexts[slotIdx].setText(this.scrambled[idx]);
     audio.click();
 
     void bg; void txt;

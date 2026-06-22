@@ -14,7 +14,6 @@ import { TicTacToeScene } from './games/tictactoe/TicTacToeScene';
 import { Connect4Scene } from './games/connect4/Connect4Scene';
 import { SumoScene } from './games/sumo/SumoScene';
 import { QuickDrawScene } from './games/quickdraw/QuickDrawScene';
-import { TrailClashScene } from './games/trail/TrailClashScene';
 import { TankDuelScene } from './games/tank/TankDuelScene';
 import { TugOfWarScene } from './games/tugofwar/TugOfWarScene';
 import { HotPotatoScene } from './games/hotpotato/HotPotatoScene';
@@ -27,7 +26,6 @@ import { EmojiQuizScene } from './games/emojiquiz/EmojiQuizScene';
 import { CountdownScene } from './games/countdown/CountdownScene';
 import { WordScrambleScene } from './games/wordscramble/WordScrambleScene';
 import { GravityPongScene } from './games/gravitypong/GravityPongScene';
-import { BombDiffuseScene } from './games/bombdiffuse/BombDiffuseScene';
 import { FlipGridScene } from './games/flipgrid/FlipGridScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -71,7 +69,6 @@ const config: Phaser.Types.Core.GameConfig = {
     Connect4Scene,
     SumoScene,
     QuickDrawScene,
-    TrailClashScene,
     TankDuelScene,
     TugOfWarScene,
     HotPotatoScene,
@@ -84,7 +81,6 @@ const config: Phaser.Types.Core.GameConfig = {
     CountdownScene,
     WordScrambleScene,
     GravityPongScene,
-    BombDiffuseScene,
     FlipGridScene,
   ],
 };
