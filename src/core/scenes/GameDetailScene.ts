@@ -3,11 +3,14 @@ import { GAMES } from '../config';
 import { Profile, AVATARS } from '../profile/Profile';
 import { FamilyProfiles } from '../profile/FamilyProfiles';
 import { Session } from '../session/Session';
+import { Storage } from '../storage/Storage';
 import { audio } from '../audio/AudioManager';
 import { mountOnStage } from '../ui/Stage';
 import { NavBack } from '../ui/NavBack';
 import { ensureSoleActiveScene } from '../ui/NavGuard';
 import { PALETTE, FONT_DISPLAY, FONT_BODY, INK, INK_DIM, INK_LABEL, BLOB_RADIUS, cssGradient, hex2css } from '../design';
+import { PlayTimer } from '../parental/PlayTimer';
+import { showTimeUpOverlay } from '../parental/PinOverlay';
 
 export class GameDetailScene extends Phaser.Scene {
   private root?: HTMLDivElement;
@@ -236,11 +239,19 @@ export class GameDetailScene extends Phaser.Scene {
       'font-family:' + FONT_DISPLAY + ';font-weight:800;font-size:18px;cursor:pointer;' +
       'background:' + def.cssGrad + ';' +
       'box-shadow:0 10px 22px rgba(74,68,102,.22);';
-    start.addEventListener('click', () => {
-      audio.click();
+    const launchGame = (): void => {
       Session.setGame(def.key, mode === '2p' ? selectedP1Id : 'main', mode === '2p' ? selectedP2Id : '');
       if (mode === '2p') this.scene.start('PassPlay', { key: def.key, player1Id: selectedP1Id, player2Id: selectedP2Id });
       else this.scene.start(def.scene, { mode });
+    };
+    start.addEventListener('click', () => {
+      audio.click();
+      if (PlayTimer.isExceeded()) {
+        const pin = Storage.getString('settings:parentPin', '');
+        showTimeUpOverlay(pin, (extraMs) => { PlayTimer.addBonus(extraMs); launchGame(); });
+        return;
+      }
+      launchGame();
     });
 
     root.append(back, hero, statsRow, tabBar, tabPanel, start);

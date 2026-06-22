@@ -5,6 +5,7 @@ import { Profile } from '../profile/Profile';
 import { audio } from '../audio/AudioManager';
 import { injectDesignKeyframes } from '../design.css';
 import { NavBack } from '../ui/NavBack';
+import { PlayTimer } from '../parental/PlayTimer';
 
 // Generates the few shared textures the physics games need (white circles we
 // tint per player), registers the session, then opens the hub.
@@ -21,6 +22,7 @@ export class BootScene extends Phaser.Scene {
     audio.setMuted(Storage.getBool('muted'));
     injectDesignKeyframes();
     Ads.setSessionCount(Storage.bumpSessions());
+    PlayTimer.startSession();
 
     // Intercept the browser/OS back gesture so it navigates within the game
     // rather than leaving the page. Each scene registers its own handler via
