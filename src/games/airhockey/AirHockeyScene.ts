@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -19,6 +19,7 @@ const TARGET = 7;
 
 export class AirHockeyScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private puck!: Phaser.Physics.Arcade.Image;
   private pad1!: Phaser.Physics.Arcade.Image;
   private pad2!: Phaser.Physics.Arcade.Image;
@@ -36,8 +37,9 @@ export class AirHockeyScene extends Phaser.Scene {
     super('AirHockey');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -161,7 +163,8 @@ export class AirHockeyScene extends Phaser.Scene {
   }
 
   private aiMove(delta: number): void {
-    const step = 0.26 * delta; // ~260 px/s â€” beatable
+    const speed = this.difficulty === 'easy' ? 0.12 : this.difficulty === 'hard' ? 0.42 : 0.26;
+    const step = speed * delta;
     let tx = this.puck.x;
     let ty: number;
     if (this.puck.y < this.midY) {
@@ -225,7 +228,7 @@ export class AirHockeyScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

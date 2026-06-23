@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -14,7 +14,7 @@ const CARD = 64;
 const GAP = 7;
 const OX = (GAME_WIDTH - (4 * CARD + 3 * GAP)) / 2;
 const OY = 170;
-const AI_MEMORY = 0.78; // chance the CPU remembers a revealed card
+const AI_MEMORY: Record<string, number> = { easy: 0.35, medium: 0.78, hard: 1.0 };
 
 interface Card {
   value: string;
@@ -24,6 +24,7 @@ interface Card {
 
 export class MemoryScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private cards: Card[] = [];
   private objs: { rect: Phaser.GameObjects.Rectangle; label: Phaser.GameObjects.Text }[] = [];
   private seen: Record<string, number[]> = {};
@@ -42,8 +43,9 @@ export class MemoryScene extends Phaser.Scene {
     super('Memory');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -108,7 +110,7 @@ export class MemoryScene extends Phaser.Scene {
     this.cards[i].faceUp = true;
     this.draw(i);
     audio.click();
-    if (Math.random() < AI_MEMORY) {
+    if (Math.random() < AI_MEMORY[this.difficulty]) {
       const arr = (this.seen[this.cards[i].value] ??= []);
       if (!arr.includes(i)) arr.push(i);
     }
@@ -246,7 +248,7 @@ export class MemoryScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

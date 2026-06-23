@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -21,6 +21,7 @@ interface Edge {
 
 export class DotsBoxesScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private hTaken: number[][] = [];
   private vTaken: number[][] = [];
   private boxOwner: number[][] = [];
@@ -39,8 +40,9 @@ export class DotsBoxesScene extends Phaser.Scene {
     super('DotsBoxes');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -177,10 +179,15 @@ export class DotsBoxesScene extends Phaser.Scene {
   private aiMove(): void {
     if (this.over) return;
     const free = this.freeEdges();
-    const completing = free.filter((e) => this.adjBoxes(e.type, e.r, e.c).some(([br, bc]) => this.boxSides(br, bc) === 3));
-    const safe = free.filter((e) => !this.adjBoxes(e.type, e.r, e.c).some(([br, bc]) => this.boxSides(br, bc) === 2));
-    const pool = completing.length ? completing : safe.length ? safe : free;
-    const choice = Phaser.Utils.Array.GetRandom(pool);
+    let choice: Edge;
+    if (this.difficulty === 'easy') {
+      choice = Phaser.Utils.Array.GetRandom(free) as Edge;
+    } else {
+      const completing = free.filter((e) => this.adjBoxes(e.type, e.r, e.c).some(([br, bc]) => this.boxSides(br, bc) === 3));
+      const safe = free.filter((e) => !this.adjBoxes(e.type, e.r, e.c).some(([br, bc]) => this.boxSides(br, bc) === 2));
+      const pool = completing.length ? completing : safe.length ? safe : free;
+      choice = Phaser.Utils.Array.GetRandom(pool) as Edge;
+    }
 
     this.time.delayedCall(450, () => {
       if (this.over) return;
@@ -224,7 +231,7 @@ export class DotsBoxesScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -18,6 +18,7 @@ const TARGET = 3;
 
 export class HotPotatoScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private bomb!: Phaser.GameObjects.Text;
   private holder = 1; // 1 = bottom, 2 = top
   private traveling = false;
@@ -35,8 +36,9 @@ export class HotPotatoScene extends Phaser.Scene {
     super('HotPotato');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -83,7 +85,8 @@ export class HotPotatoScene extends Phaser.Scene {
 
   private scheduleAi(): void {
     if (this.mode === 'ai' && this.holder === 2 && !this.traveling) {
-      this.aiWhackAt = this.time.now + Phaser.Math.Between(260, 720);
+      const [lo, hi] = this.difficulty === 'easy' ? [500, 1100] : this.difficulty === 'hard' ? [100, 350] : [260, 720];
+      this.aiWhackAt = this.time.now + Phaser.Math.Between(lo, hi);
     } else {
       this.aiWhackAt = 0;
     }
@@ -166,7 +169,7 @@ export class HotPotatoScene extends Phaser.Scene {
       title,
       titleColor: color,
       subtitle: `${this.p1} – ${this.p2}`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
       onHome: () => this.toHub(true),
     });
   }

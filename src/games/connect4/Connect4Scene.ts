@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -14,6 +14,7 @@ const CELL = 46;
 
 export class Connect4Scene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private board: number[] = [];
   private current = 1;
   private over = false;
@@ -27,8 +28,9 @@ export class Connect4Scene extends Phaser.Scene {
     super('Connect4');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -173,8 +175,9 @@ export class Connect4Scene extends Phaser.Scene {
     const block = tryWin(1);
     if (block >= 0) return block;
 
+    const stratChance = this.difficulty === 'easy' ? 0.3 : this.difficulty === 'hard' ? 1.0 : 0.8;
     const order = [3, 2, 4, 1, 5, 0, 6].filter((c) => valid.includes(c));
-    if (Math.random() < 0.8 && order.length) return order[0];
+    if (Math.random() < stratChance && order.length) return order[0];
     return Phaser.Utils.Array.GetRandom(valid);
   }
 
@@ -216,7 +219,7 @@ export class Connect4Scene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

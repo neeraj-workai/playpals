@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -19,6 +19,7 @@ const TARGET = 3;
 
 export class TugOfWarScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private knot!: Phaser.GameObjects.Container;
   private knotY = CENTER_Y;
   private p1 = 0;
@@ -34,8 +35,9 @@ export class TugOfWarScene extends Phaser.Scene {
     super('TugOfWar');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -85,7 +87,8 @@ export class TugOfWarScene extends Phaser.Scene {
     this.time.delayedCall(800, () => this.status.setText(''));
     if (this.mode === 'ai') {
       this.aiTimer?.remove(false);
-      this.aiTimer = this.time.addEvent({ delay: 165, loop: true, callback: () => { if (!this.locked && !this.over) this.pull(2); } });
+      const aiDelay = this.difficulty === 'easy' ? 330 : this.difficulty === 'hard' ? 75 : 165;
+      this.aiTimer = this.time.addEvent({ delay: aiDelay, loop: true, callback: () => { if (!this.locked && !this.over) this.pull(2); } });
     }
   }
 
@@ -134,7 +137,7 @@ export class TugOfWarScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

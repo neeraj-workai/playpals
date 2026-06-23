@@ -4,8 +4,11 @@
 // (you vs the CPU); "2p" is local two-player on the same device.
 export type GameMode = 'ai' | '2p';
 
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
 export interface GameLaunch {
   mode: GameMode;
+  difficulty?: Difficulty;
 }
 
 export const P1_LABEL = 'P1';

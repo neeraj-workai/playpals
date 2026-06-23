@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -21,6 +21,7 @@ type Body = Phaser.Physics.Arcade.Body;
 
 export class SumoScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private s1!: Phaser.Physics.Arcade.Image;
   private s2!: Phaser.Physics.Arcade.Image;
   private p1 = 0;
@@ -36,8 +37,9 @@ export class SumoScene extends Phaser.Scene {
     super('Sumo');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -76,8 +78,9 @@ export class SumoScene extends Phaser.Scene {
     });
 
     if (this.mode === 'ai') {
+      const delay = this.difficulty === 'easy' ? 1400 : this.difficulty === 'hard' ? 300 : 700;
       this.time.addEvent({
-        delay: 700,
+        delay,
         loop: true,
         callback: () => {
           if (!this.over && !this.locked) this.dash(this.s2, this.s1, 2);
@@ -163,7 +166,7 @@ export class SumoScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

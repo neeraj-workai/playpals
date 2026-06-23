@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -18,6 +18,7 @@ const SPINS = 4;        // full rotations during the toss
 
 export class CoinTossScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private current = 1;
   private p1 = 0;
   private p2 = 0;
@@ -38,8 +39,9 @@ export class CoinTossScene extends Phaser.Scene {
 
   constructor() { super('CoinToss'); }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -242,7 +244,7 @@ export class CoinTossScene extends Phaser.Scene {
     showResult(this, {
       title,
       subtitle: `${this.p1} – ${this.p2}`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
       onHome: () => this.toHub(true),
     });
   }

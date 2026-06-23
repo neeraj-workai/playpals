@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -22,6 +22,7 @@ interface Hole {
 
 export class WhackScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private holes: Hole[] = [];
   private p1 = 0;
   private p2 = 0;
@@ -37,8 +38,9 @@ export class WhackScene extends Phaser.Scene {
     super('Whack');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -101,8 +103,9 @@ export class WhackScene extends Phaser.Scene {
     const dur = Phaser.Math.Between(800, 1300);
     hole.hideEv = this.time.delayedCall(dur, () => { if (hole.active) this.hideMole(hole); });
 
-    if (this.mode === 'ai' && hole.side === 2 && Math.random() < 0.75) {
-      this.time.delayedCall(Phaser.Math.Between(300, 620), () => { if (hole.active) this.whack(hole); });
+    const [lo, hi, hitChance] = this.difficulty === 'easy' ? [500, 900, 0.5] : this.difficulty === 'hard' ? [100, 350, 0.95] : [300, 620, 0.75];
+    if (this.mode === 'ai' && hole.side === 2 && Math.random() < hitChance) {
+      this.time.delayedCall(Phaser.Math.Between(lo, hi), () => { if (hole.active) this.whack(hole); });
     }
   }
 
@@ -156,7 +159,7 @@ export class WhackScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

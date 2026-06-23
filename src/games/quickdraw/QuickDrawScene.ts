@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -17,6 +17,7 @@ type Phase = 'intro' | 'waiting' | 'go' | 'resolved';
 
 export class QuickDrawScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private phase: Phase = 'intro';
   private p1 = 0;
   private p2 = 0;
@@ -34,8 +35,9 @@ export class QuickDrawScene extends Phaser.Scene {
     super('QuickDraw');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -89,8 +91,8 @@ export class QuickDrawScene extends Phaser.Scene {
     this.status.setText('GO!');
     audio.beep();
     if (this.mode === 'ai') {
-      const reaction = Phaser.Math.Between(260, 680);
-      this.aiTimer = this.time.delayedCall(reaction, () => this.resolve(2, false));
+      const [lo, hi] = this.difficulty === 'easy' ? [600, 1200] : this.difficulty === 'hard' ? [80, 280] : [260, 680];
+      this.aiTimer = this.time.delayedCall(Phaser.Math.Between(lo, hi), () => this.resolve(2, false));
     }
   }
 
@@ -148,7 +150,7 @@ export class QuickDrawScene extends Phaser.Scene {
       title,
       titleColor: color,
       subtitle: `${this.p1} – ${this.p2}`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
       onHome: () => this.toHub(true),
     });
   }

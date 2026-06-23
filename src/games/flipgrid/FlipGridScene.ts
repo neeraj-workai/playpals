@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -22,6 +22,7 @@ const GRID_Y = GAME_HEIGHT / 2 - GRID_H / 2 + CELL / 2;
 
 export class FlipGridScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private turn = 1;    // 1 = P1, 2 = P2
   private grid: number[] = [];          // 0=empty, 1=P1, 2=P2
   private cells: Phaser.GameObjects.Rectangle[] = [];
@@ -34,7 +35,7 @@ export class FlipGridScene extends Phaser.Scene {
   private aiTimer?: Phaser.Time.TimerEvent;
 
   constructor() { super('FlipGrid'); }
-  init(data: { mode?: GameMode }): void { this.mode = data?.mode ?? 'ai'; }
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void { this.mode = data?.mode ?? 'ai'; this.difficulty = data?.difficulty ?? 'medium'; }
 
   create(): void {
     ensureSoleActiveScene(this);
@@ -148,8 +149,9 @@ export class FlipGridScene extends Phaser.Scene {
   }
 
   private aiChoose(): number {
-    // Greedy: pick the empty tile that flips the most opponent tiles
     const empties = this.grid.map((v, i) => v === 0 ? i : -1).filter(i => i >= 0);
+    if (this.difficulty === 'easy') return Phaser.Utils.Array.GetRandom(empties) as number;
+    // medium/hard: greedy — pick tile that flips most opponent tiles
     let best = empties[0], bestScore = -1;
     empties.forEach(idx => {
       const r = Math.floor(idx / COLS), c = idx % COLS;
@@ -180,7 +182,7 @@ export class FlipGridScene extends Phaser.Scene {
     showResult(this, {
       title,
       subtitle: `P1: ${this.p1Count}  –  P2: ${this.p2Count}`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
       onHome: () => this.toHub(true),
     });
   }

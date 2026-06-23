@@ -26,6 +26,7 @@ export class GameDetailScene extends Phaser.Scene {
     ensureSoleActiveScene(this);
     const def = GAMES.find((g) => g.key === this.gameKey) ?? GAMES[0];
     let mode: 'ai' | '2p' = '2p';
+    let difficulty: 'easy' | 'medium' | 'hard' = 'medium';
     let selectedP2Id = '';   // empty = anonymous Player 2
     let selectedP1Id = 'main'; // 'main' = device owner, else a family member id
 
@@ -117,6 +118,37 @@ export class GameDetailScene extends Phaser.Scene {
     const seg2 = segBtn('2P · Pass & play');
     seg.append(seg1, seg2);
 
+    // Difficulty picker (1P vs CPU only)
+    const diffRow = document.createElement('div');
+    diffRow.style.cssText = 'flex:none;display:none;flex-direction:column;gap:6px;';
+    const diffLabel = document.createElement('div');
+    diffLabel.style.cssText = 'font-size:11px;color:' + INK_LABEL + ';font-weight:800;letter-spacing:1px;';
+    diffLabel.textContent = 'BOT DIFFICULTY';
+    const diffBtns = document.createElement('div');
+    diffBtns.style.cssText = 'display:flex;gap:6px;';
+    const DIFFS: Array<['easy' | 'medium' | 'hard', string]> = [['easy', '😌 Easy'], ['medium', '🎯 Medium'], ['hard', '💀 Hard']];
+    const diffBtnEls: HTMLButtonElement[] = [];
+    function styleDiffBtns() {
+      diffBtnEls.forEach((b, i) => {
+        const sel = DIFFS[i][0] === difficulty;
+        b.style.cssText =
+          'flex:1;height:38px;border:none;border-radius:12px;cursor:pointer;font-family:' + FONT_DISPLAY +
+          ';font-weight:800;font-size:12px;transition:all .15s;' +
+          'background:' + (sel ? def.cssGrad : '#fff') + ';' +
+          'color:' + (sel ? '#fff' : INK_DIM) + ';' +
+          'box-shadow:' + (sel ? '0 4px 10px rgba(80,60,140,.20)' : '0 2px 6px rgba(80,60,140,.06)') + ';';
+      });
+    }
+    DIFFS.forEach(([val, lbl]) => {
+      const b = document.createElement('button');
+      b.textContent = lbl;
+      b.addEventListener('click', () => { difficulty = val; audio.click(); styleDiffBtns(); });
+      diffBtns.append(b);
+      diffBtnEls.push(b);
+    });
+    diffRow.append(diffLabel, diffBtns);
+    styleDiffBtns();
+
     // P1 + P2 picker sections side-by-side (visible only in 2P mode)
     const pickerRow = document.createElement('div');
     pickerRow.style.cssText = 'flex:none;display:flex;gap:10px;';
@@ -125,7 +157,7 @@ export class GameDetailScene extends Phaser.Scene {
     const p2Section = document.createElement('div');
     p2Section.style.cssText = 'flex:1;min-width:0;';
     pickerRow.append(p1Section, p2Section);
-    playersPanel.append(seg, pickerRow);
+    playersPanel.append(seg, diffRow, pickerRow);
 
     // How to play panel
     const howtoPanel = document.createElement('div');
@@ -206,8 +238,8 @@ export class GameDetailScene extends Phaser.Scene {
       return b;
     }
 
-    seg1.addEventListener('click', () => { mode = 'ai'; selectedP1Id = 'main'; selectedP2Id = ''; styleSeg(); renderP1Picker(); renderP2Picker(); audio.click(); });
-    seg2.addEventListener('click', () => { mode = '2p'; styleSeg(); renderP1Picker(); renderP2Picker(); audio.click(); });
+    seg1.addEventListener('click', () => { mode = 'ai'; selectedP1Id = 'main'; selectedP2Id = ''; styleSeg(); diffRow.style.display = 'flex'; renderP1Picker(); renderP2Picker(); audio.click(); });
+    seg2.addEventListener('click', () => { mode = '2p'; styleSeg(); diffRow.style.display = 'none'; renderP1Picker(); renderP2Picker(); audio.click(); });
 
     function segBtn(label: string): HTMLButtonElement {
       const b = document.createElement('button');
@@ -242,7 +274,7 @@ export class GameDetailScene extends Phaser.Scene {
     const launchGame = (): void => {
       Session.setGame(def.key, mode === '2p' ? selectedP1Id : 'main', mode === '2p' ? selectedP2Id : '');
       if (mode === '2p') this.scene.start('PassPlay', { key: def.key, player1Id: selectedP1Id, player2Id: selectedP2Id });
-      else this.scene.start(def.scene, { mode });
+      else this.scene.start(def.scene, { mode, difficulty });
     };
     start.addEventListener('click', () => {
       audio.click();

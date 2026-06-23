@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -16,6 +16,7 @@ const LINES = [
 
 export class TicTacToeScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private cells: number[] = [];
   private current = 1;
   private over = false;
@@ -30,8 +31,9 @@ export class TicTacToeScene extends Phaser.Scene {
     super('TicTacToe');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -143,9 +145,9 @@ export class TicTacToeScene extends Phaser.Scene {
     const block = completes(1);
     if (block >= 0) return block;
 
-    // 70% play strategically, 30% random â€” keeps the CPU beatable.
+    const stratChance = this.difficulty === 'easy' ? 0.3 : this.difficulty === 'hard' ? 1.0 : 0.7;
     const options = empty();
-    if (Math.random() < 0.7) {
+    if (Math.random() < stratChance) {
       if (this.cells[4] === 0) return 4;
       const corners = [0, 2, 6, 8].filter((i) => this.cells[i] === 0);
       if (corners.length) return Phaser.Utils.Array.GetRandom(corners);
@@ -196,7 +198,7 @@ export class TicTacToeScene extends Phaser.Scene {
       showResult(this, {
         title,
         titleColor: color,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );
