@@ -9,7 +9,34 @@ import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
 const BG = 0x04201a;
-const WORDS = ['CAKE', 'JUMP', 'FISH', 'STAR', 'WOLF', 'FROG', 'DRUM', 'BELT', 'ROSE', 'DUCK', 'KITE', 'SHIP', 'CLAW', 'GRIN', 'FLEX', 'MIST', 'BOLT', 'SLUG', 'BREW', 'WAND'];
+
+// 130 words: 60×4-letter, 40×5-letter, 30×6-letter
+const WORDS = [
+  // 4-letter
+  'CAKE','JUMP','FISH','STAR','WOLF','FROG','DRUM','BELT','ROSE','DUCK',
+  'KITE','SHIP','CLAW','GRIN','FLEX','MIST','BOLT','SLUG','BREW','WAND',
+  'BARK','BIRD','CAVE','COIN','DARK','DEER','FIRE','GLOW','GOLD','HAIR',
+  'HIVE','HORN','JADE','LAMP','LEAF','MAZE','MILK','MOON','MOSS','NAIL',
+  'NEST','NOTE','PALM','PEAR','PINE','POND','RAIN','REEF','SAND','SEED',
+  'SILK','SNOW','SONG','STEM','SWAN','TOAD','VINE','WAVE','WIND','WING',
+  // 5-letter
+  'APPLE','BEACH','BLADE','BLAST','BRAVE','BREAD','BRICK','BROOK','BRUSH','CABIN',
+  'CHASE','CLAIM','CLASH','CLEAN','CLIFF','CLOUD','COACH','CORAL','CRANK','CRAWL',
+  'CREAM','CRISP','CROSS','CROWN','CRUSH','CURVE','DAISY','DANCE','DEPTH','DITCH',
+  'DODGE','DRAFT','DRAIN','DREAD','DREAM','DRIFT','DRINK','DRIVE','FLAME','FLARE',
+  // 6-letter
+  'BATTLE','BRIDGE','BRIGHT','BRONZE','CARPET','CASTLE','CAUGHT','CELLAR','CHANGE','CHARGE',
+  'CHISEL','CIRCLE','CLOVER','COBALT','COMBAT','CRAFTY','CRAYON','CREATE','CRUISE','DAGGER',
+  'DANGER','DESERT','FOSSIL','FROZEN','GARDEN','GRAVEL','JIGSAW','KNIGHT','LAUNCH','MARBLE',
+];
+
+// Tile + slot dimensions keyed by word length
+const TILE_CFG: Record<number, { tileW: number; gap: number; fontSize: string; slotW: number; slotGap: number }> = {
+  4: { tileW: 72, gap: 10, fontSize: '28px', slotW: 54, slotGap: 12 },
+  5: { tileW: 58, gap:  8, fontSize: '24px', slotW: 44, slotGap:  8 },
+  6: { tileW: 48, gap:  6, fontSize: '20px', slotW: 36, slotGap:  6 },
+};
+
 const WIN_ROUNDS = 3;
 const TOP_H = 68;
 const BOT_H = 68;
@@ -28,6 +55,8 @@ export class WordScrambleScene extends Phaser.Scene {
   private p2LetterBtns: Phaser.GameObjects.Container[] = [];
   private p1AnswerTexts: Phaser.GameObjects.Text[] = [];
   private p2AnswerTexts: Phaser.GameObjects.Text[] = [];
+  private p1SlotBgs: Phaser.GameObjects.Rectangle[] = [];
+  private p2SlotBgs: Phaser.GameObjects.Rectangle[] = [];
   private p1ScoreText!: Phaser.GameObjects.Text;
   private p2ScoreText!: Phaser.GameObjects.Text;
   private statusText!: Phaser.GameObjects.Text;
@@ -78,7 +107,6 @@ export class WordScrambleScene extends Phaser.Scene {
     this.usedWords.add(this.word);
 
     this.scrambled = Phaser.Utils.Array.Shuffle(this.word.split('')) as string[];
-    // Re-shuffle until scrambled ≠ original
     while (this.scrambled.join('') === this.word)
       Phaser.Utils.Array.Shuffle(this.scrambled);
 
@@ -98,74 +126,74 @@ export class WordScrambleScene extends Phaser.Scene {
     this.p1LetterBtns = []; this.p2LetterBtns = [];
     this.p1AnswerTexts.forEach(t => t.destroy()); this.p1AnswerTexts = [];
     this.p2AnswerTexts.forEach(t => t.destroy()); this.p2AnswerTexts = [];
+    this.p1SlotBgs.forEach(r => r.destroy()); this.p1SlotBgs = [];
+    this.p2SlotBgs.forEach(r => r.destroy()); this.p2SlotBgs = [];
   }
 
   private buildLetterTiles(): void {
-    const tileW = 72, tileH = 72, gap = 10;
-    const totalW = 4 * tileW + 3 * gap;
+    const n = this.word.length;
+    const { tileW, gap, fontSize } = TILE_CFG[n] ?? TILE_CFG[4];
+    const tileH = tileW;
+    const totalW = n * tileW + (n - 1) * gap;
     const startX = (GAME_WIDTH - totalW) / 2 + tileW / 2;
-
-    // P1 letters — in lower zone, y ≈ MID_Y + 100
     const p1TileY = MID_Y + 110;
-    // P2 letters — in upper zone, y ≈ MID_Y - 100
     const p2TileY = MID_Y - 110;
 
     this.scrambled.forEach((letter, i) => {
       const x = startX + i * (tileW + gap);
 
       const p1bg = this.add.rectangle(0, 0, tileW, tileH, COLORS.p1, 0.25).setStrokeStyle(2, COLORS.p1, 0.7);
-      const p1txt = this.add.text(0, 0, letter, { fontFamily: 'Arial Black, Arial', fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
+      const p1txt = this.add.text(0, 0, letter, { fontFamily: 'Arial Black, Arial', fontSize, color: '#ffffff' }).setOrigin(0.5);
       const p1cont = this.add.container(x, p1TileY, [p1bg, p1txt]).setDepth(10).setSize(tileW, tileH).setInteractive({ useHandCursor: true });
-      p1cont.on('pointerdown', () => this.tapLetter(i, 1, p1bg, p1txt));
+      p1cont.on('pointerdown', () => this.tapLetter(i, 1));
       this.p1LetterBtns.push(p1cont);
 
-      const p2x = startX + (3 - i) * (tileW + gap);
+      // P2 tiles: mirror x so P2 reads L→R when rotated 180°
+      const p2x = startX + (n - 1 - i) * (tileW + gap);
       const p2bg = this.add.rectangle(0, 0, tileW, tileH, COLORS.p2, 0.25).setStrokeStyle(2, COLORS.p2, 0.7);
-      const p2txt = this.add.text(0, 0, letter, { fontFamily: 'Arial Black, Arial', fontSize: '28px', color: '#ffffff' }).setOrigin(0.5);
+      const p2txt = this.add.text(0, 0, letter, { fontFamily: 'Arial Black, Arial', fontSize, color: '#ffffff' }).setOrigin(0.5);
       const p2cont = this.add.container(p2x, p2TileY, [p2bg, p2txt]).setDepth(10).setSize(tileW, tileH).setAngle(180).setInteractive({ useHandCursor: true });
-      p2cont.on('pointerdown', () => this.tapLetter(i, 2, p2bg, p2txt));
+      p2cont.on('pointerdown', () => this.tapLetter(i, 2));
       this.p2LetterBtns.push(p2cont);
     });
   }
 
   private buildAnswerSlots(): void {
-    const slotW = 54, gap = 12;
-    const totalW = 4 * slotW + 3 * gap;
+    const n = this.word.length;
+    const { slotW, slotGap, fontSize } = TILE_CFG[n] ?? TILE_CFG[4];
+    const totalW = n * slotW + (n - 1) * slotGap;
     const startX = (GAME_WIDTH - totalW) / 2 + slotW / 2;
     const p1SlotY = MID_Y + 210;
     const p2SlotY = MID_Y - 210;
 
-    for (let i = 0; i < 4; i++) {
-      const x = startX + i * (slotW + gap);
-      this.add.rectangle(x, p1SlotY, slotW, 56, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.3);
-      this.add.rectangle(x, p2SlotY, slotW, 56, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.3);
-      this.p1AnswerTexts.push(this.add.text(x, p1SlotY, '', { fontFamily: 'Arial Black, Arial', fontSize: '24px', color: '#ffffff' }).setOrigin(0.5).setDepth(8));
-      this.p2AnswerTexts.push(this.add.text(x, p2SlotY, '', { fontFamily: 'Arial Black, Arial', fontSize: '24px', color: '#ffffff' }).setOrigin(0.5).setAngle(180).setDepth(8));
+    for (let i = 0; i < n; i++) {
+      const x = startX + i * (slotW + slotGap);
+      this.p1SlotBgs.push(this.add.rectangle(x, p1SlotY, slotW, 56, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.3));
+      this.p2SlotBgs.push(this.add.rectangle(x, p2SlotY, slotW, 56, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.3));
+      this.p1AnswerTexts.push(this.add.text(x, p1SlotY, '', { fontFamily: 'Arial Black, Arial', fontSize, color: '#ffffff' }).setOrigin(0.5).setDepth(8));
+      this.p2AnswerTexts.push(this.add.text(x, p2SlotY, '', { fontFamily: 'Arial Black, Arial', fontSize, color: '#ffffff' }).setOrigin(0.5).setAngle(180).setDepth(8));
     }
   }
 
-  private tapLetter(idx: number, player: number, bg: Phaser.GameObjects.Rectangle, txt: Phaser.GameObjects.Text): void {
+  private tapLetter(idx: number, player: number): void {
     if (this.roundOver) return;
     if (player === 2 && this.mode === 'ai') return;
     const answer = player === 1 ? this.p1Answer : this.p2Answer;
     const answerTexts = player === 1 ? this.p1AnswerTexts : this.p2AnswerTexts;
     const letterBtns = player === 1 ? this.p1LetterBtns : this.p2LetterBtns;
 
-    if (letterBtns[idx].alpha < 0.4) return; // already used
+    if (letterBtns[idx].alpha < 0.4) return;
     letterBtns[idx].setAlpha(0.3);
     answer.push(this.scrambled[idx]);
-    // P2 is rotated 180°: fill slots right-to-left on screen so they appear L→R from P2's view
-    const slotIdx = player === 2 ? (3 - (answer.length - 1)) : (answer.length - 1);
+    // P2 is rotated 180°: fill slots R→L on screen so letters appear L→R from P2's view
+    const slotIdx = player === 2 ? (this.word.length - answer.length) : (answer.length - 1);
     answerTexts[slotIdx].setText(this.scrambled[idx]);
     audio.click();
 
-    void bg; void txt;
-
-    if (answer.length === 4) {
+    if (answer.length === this.word.length) {
       if (answer.join('') === this.word) {
         this.onRoundWin(player);
       } else {
-        // wrong — shake and reset
         this.cameras.main.shake(220, 0.006);
         audio.bump();
         this.time.delayedCall(400, () => {
@@ -178,8 +206,9 @@ export class WordScrambleScene extends Phaser.Scene {
   }
 
   private scheduleAI(): void {
-    // CPU solves after a random delay
-    const delay = Phaser.Math.Between(2200, 4500);
+    // Longer words get a bit more time
+    const extra = (this.word.length - 4) * 500;
+    const delay = Phaser.Math.Between(2200 + extra, 4500 + extra);
     this.aiTimer = this.time.delayedCall(delay, () => {
       if (!this.roundOver) this.onRoundWin(2);
     });
