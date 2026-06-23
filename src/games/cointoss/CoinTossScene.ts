@@ -1,5 +1,5 @@
-﻿import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
+import Phaser from 'phaser';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -8,12 +8,13 @@ import { GameMode } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
-// Turn-based "call it" game. Each turn the current player picks heads or
-// tails; the coin flips; correct call = +1; first to TARGET wins.
 const TARGET = 5;
 const CX = GAME_WIDTH / 2;
 const CY = GAME_HEIGHT * 0.42;
-const COIN_R = 50;
+const COIN_R = 56;
+const RISE = 230;       // px the coin travels upward
+const SPIN_DURATION = 1500; // ms
+const SPINS = 4;        // full rotations during the toss
 
 export class CoinTossScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
@@ -26,8 +27,11 @@ export class CoinTossScene extends Phaser.Scene {
   private p2Text!: Phaser.GameObjects.Text;
   private turnText!: Phaser.GameObjects.Text;
   private resultText!: Phaser.GameObjects.Text;
-  private coinCircle!: Phaser.GameObjects.Arc;
+  private coinContainer!: Phaser.GameObjects.Container;
+  private coinFace!: Phaser.GameObjects.Arc;
   private coinRim!: Phaser.GameObjects.Arc;
+  private coinEdge!: Phaser.GameObjects.Arc;
+  private coinShine!: Phaser.GameObjects.Arc;
   private coinLabel!: Phaser.GameObjects.Text;
   private headsBtn!: Phaser.GameObjects.Container;
   private tailsBtn!: Phaser.GameObjects.Container;
@@ -43,62 +47,94 @@ export class CoinTossScene extends Phaser.Scene {
     setupSceneScale(this);
     this.current = 1; this.p1 = 0; this.p2 = 0;
     this.over = false; this.locked = false;
-    this.cameras.main.setBackgroundColor(0x242000); // dark gold
+    this.cameras.main.setBackgroundColor(0x1a1400);
 
     addBackButton(this, () => this.toHub(false));
 
-    this.p2Text = this.add.text(60, 40, '0', { fontFamily: 'Arial Black, Arial', fontSize: '26px', color: '#' + COLORS.p2.toString(16) }).setOrigin(0.5);
-    this.p1Text = this.add.text(340, 40, '0', { fontFamily: 'Arial Black, Arial', fontSize: '26px', color: '#' + COLORS.p1.toString(16) }).setOrigin(0.5);
-    this.add.text(60, 60, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
-    this.add.text(340, 60, 'P1', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
+    // Score display
+    const scoreStyle = { fontFamily: 'Arial Black, Arial', fontSize: '30px' };
+    this.p2Text = this.add.text(70, 44, '0', { ...scoreStyle, color: '#' + COLORS.p2.toString(16) }).setOrigin(0.5);
+    this.p1Text = this.add.text(330, 44, '0', { ...scoreStyle, color: '#' + COLORS.p1.toString(16) }).setOrigin(0.5);
+    this.add.text(70, 72, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '12px', color: '#888888' }).setOrigin(0.5);
+    this.add.text(330, 72, 'P1', { fontFamily: 'Arial', fontSize: '12px', color: '#888888' }).setOrigin(0.5);
 
-    this.turnText = this.add.text(CX, 120, '', { fontFamily: 'Arial Black, Arial', fontSize: '19px', color: '#ffffff' }).setOrigin(0.5);
+    this.turnText = this.add.text(CX, 118, '', {
+      fontFamily: 'Arial Black, Arial', fontSize: '18px', color: '#ffffff',
+    }).setOrigin(0.5);
 
-    // Coin drawn as Phaser Arc (no emoji â€” reliable on all Android versions)
-    this.coinCircle = this.add.arc(CX, CY, COIN_R, 0, 360, false, 0xFFD700).setDepth(2);
-    this.coinRim    = this.add.arc(CX, CY, COIN_R - 7, 0, 360, false, 0xE8B400).setDepth(3);
-    this.coinLabel  = this.add.text(CX, CY, '?', {
-      fontFamily: 'Arial Black, Arial', fontSize: '34px', color: '#7A5E00',
-    }).setOrigin(0.5).setDepth(4);
+    // Coin built inside a container so we can tween position + scaleX together
+    this.coinContainer = this.add.container(CX, CY);
 
-    this.resultText = this.add.text(CX, GAME_HEIGHT * 0.62, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+    // Outer edge (slightly larger, dark gold — gives a 3-D rim feel)
+    this.coinEdge = this.add.arc(0, 0, COIN_R + 5, 0, 360, false, 0xA07800);
+    // Main face
+    this.coinFace = this.add.arc(0, 0, COIN_R, 0, 360, false, 0xFFD700);
+    // Inner recess
+    this.coinRim  = this.add.arc(0, 0, COIN_R - 9, 0, 360, false, 0xE8B800);
+    // Small shine highlight (top-left)
+    this.coinShine = this.add.arc(-14, -20, 10, 200, 340, false, 0xFFFACC, 0.55);
+    // Face label
+    this.coinLabel = this.add.text(0, 2, '?', {
+      fontFamily: 'Arial Black, Arial', fontSize: '38px', color: '#7A5C00',
+    }).setOrigin(0.5);
 
-    this.headsBtn = this.makeBtn(CX - 84, GAME_HEIGHT - 90, 'HEADS', COLORS.p1, () => this.call('H'));
-    this.tailsBtn = this.makeBtn(CX + 84, GAME_HEIGHT - 90, 'TAILS', COLORS.p2, () => this.call('T'));
+    this.coinContainer.add([
+      this.coinEdge, this.coinFace, this.coinRim, this.coinShine, this.coinLabel,
+    ]);
+
+    // Drop-shadow arc behind the container (static, slightly offset)
+    this.add.arc(CX + 4, CY + 6, COIN_R + 5, 0, 360, false, 0x000000, 0.22).setDepth(-1);
+
+    this.resultText = this.add.text(CX, GAME_HEIGHT * 0.62, '', {
+      fontFamily: 'Arial Black, Arial', fontSize: '22px', color: '#ffffff',
+    }).setOrigin(0.5);
+
+    this.headsBtn = this.makeBtn(CX - 88, GAME_HEIGHT - 88, 'HEADS', COLORS.p1, () => this.call('H'));
+    this.tailsBtn = this.makeBtn(CX + 88, GAME_HEIGHT - 88, 'TAILS', COLORS.p2, () => this.call('T'));
 
     this.startTurn();
   }
 
   private makeBtn(x: number, y: number, label: string, color: number, on: () => void): Phaser.GameObjects.Container {
     const c = this.add.container(x, y);
-    const bg = this.add.rectangle(0, 0, 148, 56, color, 1).setInteractive({ useHandCursor: true });
+    const bg = this.add.rectangle(0, 0, 152, 58, color, 1).setInteractive({ useHandCursor: true });
     const txt = this.add.text(0, 0, label, { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
     c.add([bg, txt]);
-    bg.on('pointerover', () => c.setScale(1.05));
+    bg.on('pointerover', () => c.setScale(1.06));
     bg.on('pointerout',  () => c.setScale(1));
     bg.on('pointerdown', () => { if (!this.locked) on(); });
     return c;
   }
 
-  private setCoin(label: string, gold: boolean): void {
-    this.coinLabel.setText(label);
-    const fill = gold ? 0xFFD700 : 0xC0C0C0;
-    const rim  = gold ? 0xE8B400 : 0xA0A0A0;
-    this.coinCircle.setFillStyle(fill);
-    this.coinRim.setFillStyle(rim);
+  /** Set coin appearance: face character + gold/silver colour scheme */
+  private setCoin(face: 'H' | 'T' | '?', gold: boolean): void {
+    const fillFace = gold ? 0xFFD700 : 0xC8C8C8;
+    const fillRim  = gold ? 0xE8B800 : 0xA8A8A8;
+    const fillEdge = gold ? 0xA07800 : 0x787878;
+    const textCol  = gold ? '#7A5C00' : '#444444';
+    this.coinFace.setFillStyle(fillFace);
+    this.coinRim.setFillStyle(fillRim);
+    this.coinEdge.setFillStyle(fillEdge);
+    this.coinLabel.setText(face).setColor(textCol);
   }
 
   private startTurn(): void {
     if (this.over) return;
     this.locked = false;
+
     const label = this.mode === 'ai'
-      ? (this.current === 1 ? 'Your call â€” heads or tails?' : 'CPU calling…')
-      : `P${this.current} â€” call it`;
-    const color = this.current === 1 ? '#' + COLORS.p1.toString(16) : '#' + COLORS.p2.toString(16);
+      ? (this.current === 1 ? 'Your call – heads or tails?' : 'CPU calling…')
+      : `P${this.current} – call it`;
+    const color = this.current === 1
+      ? '#' + COLORS.p1.toString(16)
+      : '#' + COLORS.p2.toString(16);
+
     this.turnText.setText(label).setColor(color);
     this.resultText.setText('');
+
+    // Reset coin
+    this.coinContainer.setPosition(CX, CY).setScale(1, 1).setAngle(0);
     this.setCoin('?', true);
-    this.coinCircle.setScale(1); this.coinRim.setScale(1); this.coinLabel.setScale(1);
 
     const isCpu = this.mode === 'ai' && this.current === 2;
     this.headsBtn.setAlpha(isCpu ? 0.4 : 1);
@@ -110,17 +146,64 @@ export class CoinTossScene extends Phaser.Scene {
     if (this.locked || this.over) return;
     this.locked = true;
     audio.click();
-    const coinObjs = [this.coinCircle, this.coinRim, this.coinLabel];
-    // Squish-spin animation
+
+    // Determine result now; reveal at the end of the animation
+    const result: 'H' | 'T' = Math.random() < 0.5 ? 'H' : 'T';
+
+    const tv = { t: 0 };
+    let lastHalf = -1;
+
     this.tweens.add({
-      targets: coinObjs,
-      scaleX: { from: 1, to: 0, yoyo: true },
-      duration: 600,
-      ease: 'Cubic.easeInOut',
-      onYoyo: () => {
-        const flip: 'H' | 'T' = Math.random() < 0.5 ? 'H' : 'T';
-        this.setCoin(flip === 'H' ? 'H' : 'T', flip === 'H');
-        this.time.delayedCall(0, () => this.resolve(side, flip));
+      targets: tv,
+      t: 1,
+      duration: SPIN_DURATION,
+      ease: 'Linear',
+      onUpdate: () => {
+        const t = tv.t;
+
+        // ── Parabolic arc (peak at t ≈ 0.45) ──
+        // y offset = -4 * RISE * t * (1-t)  →  peaks at t=0.5, symmetric
+        this.coinContainer.y = CY + (-4 * RISE * t * (1 - t));
+
+        // ── Spin deceleration ──
+        // spinProgress accelerates at first then eases out, like a real toss
+        const spinT = 1 - Math.pow(1 - t, 1.6);
+        const angle = spinT * SPINS * Math.PI * 2;
+
+        // scaleX = |cos(angle)| — coin narrows to a line at each half-rotation
+        this.coinContainer.scaleX = Math.max(0.02, Math.abs(Math.cos(angle)));
+
+        // ── Slow Z-axis tumble for realism ──
+        this.coinContainer.setAngle(angle * (180 / Math.PI) * 0.08);
+
+        // ── Switch face on each half-rotation ──
+        const halfIdx = Math.floor(angle / Math.PI);
+        if (halfIdx !== lastHalf) {
+          lastHalf = halfIdx;
+          if (t < 0.85) {
+            // Alternate faces while spinning
+            const showFace: 'H' | 'T' = halfIdx % 2 === 0 ? 'H' : 'T';
+            this.setCoin(showFace, showFace === 'H');
+          } else {
+            // Lock in the result face as the coin slows
+            this.setCoin(result, result === 'H');
+          }
+        }
+      },
+      onComplete: () => {
+        // Snap to resting state
+        this.coinContainer.setPosition(CX, CY).setScale(1, 1).setAngle(0);
+        this.setCoin(result, result === 'H');
+        // Landing thud + brief bounce
+        audio.bump();
+        this.tweens.add({
+          targets: this.coinContainer,
+          scaleX: { from: 1.18, to: 1 },
+          scaleY: { from: 0.82, to: 1 },
+          duration: 160,
+          ease: 'Bounce.easeOut',
+        });
+        this.time.delayedCall(220, () => this.resolve(side, result));
       },
     });
   }
@@ -133,17 +216,16 @@ export class CoinTossScene extends Phaser.Scene {
       this.p1Text.setText(String(this.p1));
       this.p2Text.setText(String(this.p2));
       audio.goal();
-      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} â€” correct! ✓`);
+      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} – correct! ✓`);
     } else {
-      audio.bump();
-      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} â€” nope!`);
+      this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} – nope!`);
     }
     if (this.p1 >= TARGET || this.p2 >= TARGET) {
       this.time.delayedCall(900, () => this.endMatch());
       return;
     }
     this.current = this.current === 1 ? 2 : 1;
-    this.time.delayedCall(1100, () => this.startTurn());
+    this.time.delayedCall(1200, () => this.startTurn());
   }
 
   private endMatch(): void {
@@ -170,4 +252,3 @@ export class CoinTossScene extends Phaser.Scene {
     this.scene.start('Hub');
   }
 }
-
