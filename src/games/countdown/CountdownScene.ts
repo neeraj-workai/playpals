@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -17,6 +17,7 @@ const MID_Y = GAME_HEIGHT / 2;
 
 export class CountdownScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private p1Count = START;
   private p2Count = START;
   private roundWins = [0, 0];
@@ -31,7 +32,7 @@ export class CountdownScene extends Phaser.Scene {
 
   constructor() { super('Countdown'); }
 
-  init(data: { mode?: GameMode }): void { this.mode = data?.mode ?? 'ai'; }
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void { this.mode = data?.mode ?? 'ai'; this.difficulty = data?.difficulty ?? 'medium'; }
 
   create(): void {
     ensureSoleActiveScene(this);
@@ -94,7 +95,8 @@ export class CountdownScene extends Phaser.Scene {
 
   private scheduleAI(): void {
     if (this.over || this.roundOver) return;
-    this.aiTimer = this.time.delayedCall(Phaser.Math.Between(60, 140), () => {
+    const [lo, hi] = this.difficulty === 'easy' ? [120, 260] : this.difficulty === 'hard' ? [25, 60] : [60, 140];
+    this.aiTimer = this.time.delayedCall(Phaser.Math.Between(lo, hi), () => {
       if (!this.over && !this.roundOver) {
         this.tap(2);
         this.scheduleAI();
@@ -150,7 +152,7 @@ export class CountdownScene extends Phaser.Scene {
     showResult(this, {
       title,
       subtitle: `${this.roundWins[0]} – ${this.roundWins[1]} rounds`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
       onHome: () => this.toHub(true),
     });
   }

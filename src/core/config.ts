@@ -36,8 +36,8 @@ export const AD_UNITS = {
 // settle in. After that, an interstitial fires every Nth match, but never
 // closer together than `minInterstitialGapMs`.
 export const AD_RULES = {
-  graceMatches: 1,             // first match: no ad (let them feel the loop first)
-  interstitialEveryNMatches: 2, // then every 2nd match — first ad lands on match #3
+  graceMatches: 4,             // first 4 plays: no ad; first ad lands on play #5
+  interstitialEveryNMatches: 2, // then every 2nd match
   minInterstitialGapMs: 60_000,
 };
 

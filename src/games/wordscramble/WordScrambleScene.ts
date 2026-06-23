@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -44,6 +44,7 @@ const MID_Y = GAME_HEIGHT / 2;
 
 export class WordScrambleScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private p1 = 0;
   private p2 = 0;
   private word = '';
@@ -64,7 +65,7 @@ export class WordScrambleScene extends Phaser.Scene {
   private aiTimer?: Phaser.Time.TimerEvent;
 
   constructor() { super('WordScramble'); }
-  init(data: { mode?: GameMode }): void { this.mode = data?.mode ?? 'ai'; }
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void { this.mode = data?.mode ?? 'ai'; this.difficulty = data?.difficulty ?? 'medium'; }
 
   create(): void {
     ensureSoleActiveScene(this);
@@ -206,9 +207,9 @@ export class WordScrambleScene extends Phaser.Scene {
   }
 
   private scheduleAI(): void {
-    // Longer words get a bit more time
     const extra = (this.word.length - 4) * 500;
-    const delay = Phaser.Math.Between(2200 + extra, 4500 + extra);
+    const [lo, hi] = this.difficulty === 'easy' ? [4000, 7000] : this.difficulty === 'hard' ? [800, 1800] : [2200, 4500];
+    const delay = Phaser.Math.Between(lo + extra, hi + extra);
     this.aiTimer = this.time.delayedCall(delay, () => {
       if (!this.roundOver) this.onRoundWin(2);
     });
@@ -236,7 +237,7 @@ export class WordScrambleScene extends Phaser.Scene {
     showResult(this, {
       title,
       subtitle: `${this.p1} – ${this.p2}`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
       onHome: () => this.toHub(true),
     });
   }

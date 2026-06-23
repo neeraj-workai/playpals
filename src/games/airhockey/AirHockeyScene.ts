@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -19,6 +19,7 @@ const TARGET = 7;
 
 export class AirHockeyScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private puck!: Phaser.Physics.Arcade.Image;
   private pad1!: Phaser.Physics.Arcade.Image;
   private pad2!: Phaser.Physics.Arcade.Image;
@@ -31,13 +32,15 @@ export class AirHockeyScene extends Phaser.Scene {
   private readonly midY = (FIELD_TOP + FIELD_BOTTOM) / 2;
   private lastPuck = new Phaser.Math.Vector2();
   private stuckMs = 0;
+  private aiAimOffset = 0;  // horizontal error introduced on each hit
 
   constructor() {
     super('AirHockey');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -118,6 +121,11 @@ export class AirHockeyScene extends Phaser.Scene {
     const d = Math.hypot(dx, dy) || 1;
     this.puck.setVelocity((dx / d) * HIT_SPEED, (dy / d) * HIT_SPEED);
     audio.hit();
+    // Fresh aim error so the CPU won't return the next shot perfectly
+    if (this.mode === 'ai' && pad === this.pad2) {
+      const spread = this.difficulty === 'easy' ? 80 : this.difficulty === 'hard' ? 20 : 45;
+      this.aiAimOffset = Phaser.Math.Between(-spread, spread);
+    }
   }
 
   update(_time: number, delta: number): void {
@@ -161,14 +169,19 @@ export class AirHockeyScene extends Phaser.Scene {
   }
 
   private aiMove(delta: number): void {
-    const step = 0.26 * delta; // ~260 px/s â€” beatable
-    let tx = this.puck.x;
+    const speed = this.difficulty === 'easy' ? 0.12 : this.difficulty === 'hard' ? 0.42 : 0.26;
+    const step = speed * delta;
+    const puckComingUp = (this.puck.body as Phaser.Physics.Arcade.Body).velocity.y < 0;
+    let tx: number;
     let ty: number;
-    if (this.puck.y < this.midY) {
-      ty = Math.min(this.puck.y, this.midY - 40); // attack the puck in its half
+    if (puckComingUp && this.puck.y < this.midY) {
+      // Puck heading toward CPU — intercept with aim error
+      tx = this.puck.x + this.aiAimOffset;
+      ty = FIELD_TOP + 70;
     } else {
-      tx = GAME_WIDTH / 2; // retreat & guard the goal
-      ty = FIELD_TOP + 90;
+      // Puck heading away — retreat to goal-line center
+      tx = GAME_WIDTH / 2;
+      ty = FIELD_TOP + 70;
     }
     const dx = tx - this.pad2.x;
     const dy = ty - this.pad2.y;
@@ -225,7 +238,7 @@ export class AirHockeyScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

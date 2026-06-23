@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -12,11 +12,11 @@ import { setupSceneScale } from '../../core/scale';
 // bottom half = P1. Big tap buttons fill each half. Fill bars show progress.
 const MID = 366;
 const TARGET = 50;
-const AI_MIN_MS = 95;
-const AI_MAX_MS = 220;
+const AI_SPEED: Record<string, [number, number]> = { easy: [200, 400], medium: [95, 220], hard: [40, 90] };
 
 export class TapRaceScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private p1 = 0;
   private p2 = 0;
   private p1Bar!: Phaser.GameObjects.Rectangle;
@@ -30,8 +30,9 @@ export class TapRaceScene extends Phaser.Scene {
     super('TapRace');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -73,7 +74,8 @@ export class TapRaceScene extends Phaser.Scene {
     } else {
       const sched = (): void => {
         if (this.over) return;
-        this.aiTimer = this.time.delayedCall(Phaser.Math.Between(AI_MIN_MS, AI_MAX_MS), () => { this.tap(2); this.pulse(p2Btn); sched(); });
+        const [lo, hi] = AI_SPEED[this.difficulty];
+        this.aiTimer = this.time.delayedCall(Phaser.Math.Between(lo, hi), () => { this.tap(2); this.pulse(p2Btn); sched(); });
       };
       sched();
     }
@@ -114,7 +116,7 @@ export class TapRaceScene extends Phaser.Scene {
       showResult(this, {
         title,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -25,6 +25,7 @@ interface Shell {
 
 export class TankDuelScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private p1!: Phaser.GameObjects.Container;
   private p2!: Phaser.GameObjects.Container;
   private shells: Shell[] = [];
@@ -38,8 +39,9 @@ export class TankDuelScene extends Phaser.Scene {
     super('Tank');
   }
 
-  init(data: { mode?: GameMode }): void {
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void {
     this.mode = data?.mode ?? 'ai';
+    this.difficulty = data?.difficulty ?? 'medium';
   }
 
   create(): void {
@@ -135,7 +137,8 @@ export class TankDuelScene extends Phaser.Scene {
 
 
   private aiMove(delta: number): void {
-    const step = 0.28 * delta;
+    const speed = this.difficulty === 'easy' ? 0.14 : this.difficulty === 'hard' ? 0.44 : 0.28;
+    const step = speed * delta;
     let target = this.p1.x; // default: aim at the player
     const incoming = this.shells
       .filter((s) => s.owner === 1 && s.go.y < P2_Y + 220)
@@ -167,7 +170,7 @@ export class TankDuelScene extends Phaser.Scene {
         title,
         titleColor: color,
         subtitle: `${this.p1Score} – ${this.p2Score}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       }),
     );

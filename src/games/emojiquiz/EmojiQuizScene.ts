@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -17,6 +17,7 @@ const BOT_H = 68;
 
 export class EmojiQuizScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private p1 = 0;
   private p2 = 0;
   private sequence: string[] = [];
@@ -32,7 +33,7 @@ export class EmojiQuizScene extends Phaser.Scene {
 
   constructor() { super('EmojiQuiz'); }
 
-  init(data: { mode?: GameMode }): void { this.mode = data?.mode ?? 'ai'; }
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void { this.mode = data?.mode ?? 'ai'; this.difficulty = data?.difficulty ?? 'medium'; }
 
   create(): void {
     ensureSoleActiveScene(this);
@@ -114,8 +115,8 @@ export class EmojiQuizScene extends Phaser.Scene {
     this.locked = false;
 
     if (this.mode === 'ai') {
-      const delay = Phaser.Math.Between(1400, 3200);
-      this.aiTimer = this.time.delayedCall(delay, () => {
+      const [lo, hi] = this.difficulty === 'easy' ? [2500, 5000] : this.difficulty === 'hard' ? [600, 1400] : [1400, 3200];
+      this.aiTimer = this.time.delayedCall(Phaser.Math.Between(lo, hi), () => {
         if (!this.locked) this.onPick(this.correctIdx, 2);
       });
     }
@@ -186,7 +187,7 @@ export class EmojiQuizScene extends Phaser.Scene {
       showResult(this, {
         title,
         subtitle: `${this.p1} – ${this.p2}`,
-        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
         onHome: () => this.toHub(true),
       })
     );

@@ -4,7 +4,7 @@ import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
-import { GameMode } from '../types';
+import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
@@ -22,6 +22,7 @@ const BASE_SPEED = 210;
 
 export class GravityPongScene extends Phaser.Scene {
   private mode: GameMode = 'ai';
+  private difficulty: Difficulty = 'medium';
   private p1 = 0;
   private p2 = 0;
   private bx = 0; private by = 0;
@@ -38,7 +39,7 @@ export class GravityPongScene extends Phaser.Scene {
   private gravTimer?: Phaser.Time.TimerEvent;
 
   constructor() { super('GravityPong'); }
-  init(data: { mode?: GameMode }): void { this.mode = data?.mode ?? 'ai'; }
+  init(data: { mode?: GameMode; difficulty?: Difficulty }): void { this.mode = data?.mode ?? 'ai'; this.difficulty = data?.difficulty ?? 'medium'; }
 
   create(): void {
     ensureSoleActiveScene(this);
@@ -131,7 +132,7 @@ export class GravityPongScene extends Phaser.Scene {
 
     // CPU paddle tracking
     if (this.mode === 'ai') {
-      const cpuSpeed = 160;
+      const cpuSpeed = this.difficulty === 'easy' ? 90 : this.difficulty === 'hard' ? 260 : 160;
       const diff = this.bx - this.p2Paddle.x;
       this.p2Paddle.x = Phaser.Math.Clamp(
         this.p2Paddle.x + Phaser.Math.Clamp(diff, -cpuSpeed * dt, cpuSpeed * dt),
@@ -204,7 +205,7 @@ export class GravityPongScene extends Phaser.Scene {
     showResult(this, {
       title,
       subtitle: `${this.p1} – ${this.p2}`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode }); },
+      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
       onHome: () => this.toHub(true),
     });
   }
