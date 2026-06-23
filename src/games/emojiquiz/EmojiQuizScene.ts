@@ -46,8 +46,8 @@ export class EmojiQuizScene extends Phaser.Scene {
 
     const label = { fontFamily: 'Arial Black, Arial', fontSize: '15px', color: '#ffffff' };
     const scoreStyle = { fontFamily: 'Arial Black, Arial', fontSize: '30px', color: '#ffffff' };
-    this.add.text(16, TOP_H / 2, this.mode === 'ai' ? 'CPU' : 'P2', label).setOrigin(0, 0.5).setAngle(180).setDepth(5);
-    this.add.text(16, GAME_HEIGHT - BOT_H / 2, 'P1', label).setOrigin(0, 0.5).setDepth(5);
+    this.add.text(GAME_WIDTH / 2, TOP_H / 2, this.mode === 'ai' ? 'CPU' : 'P2', label).setOrigin(0.5, 0.5).setAngle(180).setDepth(5);
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - BOT_H / 2, 'P1', label).setOrigin(0.5, 0.5).setDepth(5);
     this.p2ScoreText = this.add.text(GAME_WIDTH - 16, TOP_H / 2, '0', scoreStyle).setOrigin(1, 0.5).setAngle(180).setDepth(5);
     this.p1ScoreText = this.add.text(GAME_WIDTH - 16, GAME_HEIGHT - BOT_H / 2, '0', scoreStyle).setOrigin(1, 0.5).setDepth(5);
 
