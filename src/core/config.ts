@@ -93,6 +93,17 @@ const cg = (a: string, b: string): string => `linear-gradient(135deg, ${a}, ${b}
 
 export const GAMES: GameDef[] = [
   {
+    key: 'higherlower', title: 'More or Less', blurb: 'Higher or lower?', scene: 'HigherLower', icon: '📊',
+    grad: g(0x8ab4ff, 0x4263eb), cssGrad: cg('#8AB4FF', '#4263EB'),
+    tint: '#E7EDFF', tintHex: 0xe7edff, accentHex: 0x4263eb,
+    time: '2-5 min', diff: 'Easy',
+    howto: [
+      { n: 1, t: 'See a value, then guess the next one' },
+      { n: 2, t: 'Tap MORE or LESS before time runs out' },
+      { n: 3, t: '3 hearts — survive and beat your best!' },
+    ],
+  },
+  {
     key: 'airhockey', title: 'Air Hockey', blurb: 'Slide & score', scene: 'AirHockey', icon: '🏒',
     grad: g(0x74c0fc, 0x4dabf7), cssGrad: cg('#74C0FC', '#4DABF7'),
     tint: '#E9F4FF', tintHex: 0xe9f4ff, accentHex: 0x4dabf7,

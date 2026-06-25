@@ -27,6 +27,7 @@ import { CountdownScene } from './games/countdown/CountdownScene';
 import { WordScrambleScene } from './games/wordscramble/WordScrambleScene';
 import { GravityPongScene } from './games/gravitypong/GravityPongScene';
 import { FlipGridScene } from './games/flipgrid/FlipGridScene';
+import { HigherLowerScene } from './games/higherlower/HigherLowerScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -82,6 +83,7 @@ const config: Phaser.Types.Core.GameConfig = {
     WordScrambleScene,
     GravityPongScene,
     FlipGridScene,
+    HigherLowerScene,
   ],
 };
 
