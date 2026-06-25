@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -49,7 +50,9 @@ export class CoinTossScene extends Phaser.Scene {
     setupSceneScale(this);
     this.current = 1; this.p1 = 0; this.p2 = 0;
     this.over = false; this.locked = false;
-    this.cameras.main.setBackgroundColor(0x1a1400);
+    this.cameras.main.setBackgroundColor(0x4a3800);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x8a6800, 0.65).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x2a2000, 0.65).setOrigin(0.5, 0);
 
     addBackButton(this, () => this.toHub(false));
 
@@ -60,9 +63,7 @@ export class CoinTossScene extends Phaser.Scene {
     this.add.text(70, 72, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '12px', color: '#888888' }).setOrigin(0.5);
     this.add.text(330, 72, 'P1', { fontFamily: 'Arial', fontSize: '12px', color: '#888888' }).setOrigin(0.5);
 
-    this.turnText = this.add.text(CX, 118, '', {
-      fontFamily: 'Arial Black, Arial', fontSize: '18px', color: '#ffffff',
-    }).setOrigin(0.5);
+    this.turnText = this.add.text(CX, 118, '', { ...STATUS_STYLE, fontSize: '18px' }).setOrigin(0.5);
 
     // Coin built inside a container so we can tween position + scaleX together
     this.coinContainer = this.add.container(CX, CY);
@@ -217,6 +218,7 @@ export class CoinTossScene extends Phaser.Scene {
       else this.p2++;
       this.p1Text.setText(String(this.p1));
       this.p2Text.setText(String(this.p2));
+      pulseTween(this, this.current === 1 ? this.p1Text : this.p2Text);
       audio.goal();
       this.resultText.setText(`${flip === 'H' ? 'Heads' : 'Tails'} – correct! ✓`);
     } else {
@@ -241,6 +243,7 @@ export class CoinTossScene extends Phaser.Scene {
       title = p1won ? 'Player 1 wins!' : 'Player 2 wins!';
       audio.win();
     }
+    spawnConfetti(this, GAME_WIDTH / 2, 350);
     showResult(this, {
       title,
       subtitle: `${this.p1} – ${this.p2}`,

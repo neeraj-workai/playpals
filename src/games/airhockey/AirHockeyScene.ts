@@ -1,5 +1,6 @@
 ﻿import Phaser from 'phaser';
-import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { GAME_WIDTH, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -50,7 +51,9 @@ export class AirHockeyScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.locked = false;
-    this.cameras.main.setBackgroundColor(0x0f2d52); // dark blue
+    this.cameras.main.setBackgroundColor(0x0f2d52);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x2060c0, 0.5).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x061428, 0.5).setOrigin(0.5, 0);
     this.input.addPointer(2);
 
     // rink markings
@@ -209,6 +212,7 @@ export class AirHockeyScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, winner === 1 ? this.p1Text : this.p2Text);
     audio.goal();
     this.cameras.main.flash(150, 255, 255, 255);
     this.puck.setVelocity(0, 0);
@@ -233,6 +237,7 @@ export class AirHockeyScene extends Phaser.Scene {
       audio.win();
     }
     const color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, GAME_WIDTH / 2, (64 + 700) / 2);
     this.time.delayedCall(400, () =>
       showResult(this, {
         title,

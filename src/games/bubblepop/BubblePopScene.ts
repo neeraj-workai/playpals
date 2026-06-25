@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -55,7 +56,9 @@ export class BubblePopScene extends Phaser.Scene {
     this.timeLeft = GAME_SECS;
     this.over = false;
     this.bubbles = [];
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x0a1a3a);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x2050b0, 0.5).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x04101e, 0.5).setOrigin(0.5, 0);
 
     // Zone backgrounds
     this.add.rectangle(GAME_WIDTH / 2, (HUD_TOP + MID) / 2, GAME_WIDTH, MID - HUD_TOP, COLORS.p2, 0.10);
@@ -128,6 +131,7 @@ export class BubblePopScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, b.side === 1 ? this.p1Text : this.p2Text);
     const plus = this.add.text(b.arc.x, b.arc.y - 8, '+1', { fontFamily: 'Arial Black, Arial', fontSize: '15px', color: '#ffffff' }).setOrigin(0.5).setDepth(8);
     this.tweens.add({ targets: plus, y: b.arc.y - 36, alpha: 0, duration: 380, onComplete: () => plus.destroy() });
     this.tweens.add({ targets: [b.arc, b.shine], scale: 1.8, alpha: 0, duration: 120, onComplete: () => { b.arc.destroy(); b.shine.destroy(); } });
@@ -155,6 +159,7 @@ export class BubblePopScene extends Phaser.Scene {
     if (draw) { title = 'Draw'; audio.bump(); }
     else if (this.mode === 'ai') { title = p1won ? 'You win!' : 'CPU wins'; p1won ? audio.win() : audio.lose(); }
     else { title = p1won ? 'Player 1 wins!' : 'Player 2 wins!'; audio.win(); }
+    if (!draw) spawnConfetti(this, GAME_WIDTH / 2, GAME_HEIGHT / 2);
     this.time.delayedCall(500, () =>
       showResult(this, {
         title,

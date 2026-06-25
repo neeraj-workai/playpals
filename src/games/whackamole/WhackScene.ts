@@ -1,6 +1,7 @@
 ﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
 import { Ads } from '../../core/ads/AdManager';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
 import { showResult } from '../../core/ui/ResultOverlay';
@@ -51,10 +52,12 @@ export class WhackScene extends Phaser.Scene {
     this.timeLeft = GAME_SECS;
     this.over = false;
     this.holes = [];
-    this.cameras.main.setBackgroundColor(0x380a3d); // dark magenta
+    this.cameras.main.setBackgroundColor(0x6a0a7a);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x9b3dc8, 0.7).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x45085a, 0.7).setOrigin(0.5, 0);
 
-    this.add.rectangle(GAME_WIDTH / 2, (70 + MID) / 2, GAME_WIDTH, MID - 70, COLORS.p2, 0.08);
-    this.add.rectangle(GAME_WIDTH / 2, (MID + 700) / 2, GAME_WIDTH, 700 - MID, COLORS.p1, 0.08);
+    this.add.rectangle(GAME_WIDTH / 2, (70 + MID) / 2, GAME_WIDTH, MID - 70, COLORS.p2, 0.10);
+    this.add.rectangle(GAME_WIDTH / 2, (MID + 700) / 2, GAME_WIDTH, 700 - MID, COLORS.p1, 0.10);
 
     addBackButton(this, () => this.toHub(false));
     this.p2Text = this.add.text(40, 40, '0', { fontFamily: 'Arial Black, Arial', fontSize: '26px', color: '#' + COLORS.p2.toString(16) }).setOrigin(0.5).setDepth(10);
@@ -118,6 +121,7 @@ export class WhackScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, hole.side === 1 ? this.p1Text : this.p2Text);
     const plus = this.add.text(hole.x, hole.y - 10, '+1', { fontFamily: 'Arial Black, Arial', fontSize: '18px', color: '#ffffff' }).setOrigin(0.5).setDepth(8);
     this.tweens.add({ targets: plus, y: hole.y - 40, alpha: 0, duration: 500, onComplete: () => plus.destroy() });
     this.hideMole(hole);
@@ -154,6 +158,7 @@ export class WhackScene extends Phaser.Scene {
       color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
       audio.win();
     }
+    if (!draw) spawnConfetti(this, GAME_WIDTH / 2, 350);
     this.time.delayedCall(500, () =>
       showResult(this, {
         title,

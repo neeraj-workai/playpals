@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { GAME_WIDTH, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -46,7 +47,9 @@ export class BullseyeScene extends Phaser.Scene {
     this.p2Wins = 0;
     this.phase = 'resolved';
     this.pegs = [];
-    this.cameras.main.setBackgroundColor(GAME_ARENA_BG);
+    this.cameras.main.setBackgroundColor(0x1a0a40);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x5030c0, 0.5).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x0a0520, 0.5).setOrigin(0.5, 0);
 
     addBackButton(this, () => this.toHub(false));
     this.add.text(GAME_WIDTH / 2, 120, 'Stop on the gold — first to 3', { fontFamily: 'Arial', fontSize: '13px', color: COLORS.inkDim }).setOrigin(0.5);
@@ -59,7 +62,7 @@ export class BullseyeScene extends Phaser.Scene {
     this.add.rectangle(this.xFor(0.5), CENTER_Y, 26, 46, 0xfacc15, 0.25).setStrokeStyle(2, 0xfacc15, 0.8);
     this.marker = this.add.rectangle(this.xFor(0.5), CENTER_Y, 4, 42, 0xffffff, 1).setDepth(5);
 
-    this.status = this.add.text(GAME_WIDTH / 2, CENTER_Y + 96, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff', align: 'center' }).setOrigin(0.5);
+    this.status = this.add.text(GAME_WIDTH / 2, CENTER_Y + 96, '', { ...STATUS_STYLE, fontSize: '20px', align: 'center' }).setOrigin(0.5);
 
     this.add.rectangle(GAME_WIDTH / 2, 540, GAME_WIDTH, 290, 0xffffff, 0.001).setInteractive().on('pointerdown', () => this.lock(1));
     if (this.mode === '2p') {
@@ -144,6 +147,7 @@ export class BullseyeScene extends Phaser.Scene {
     else this.p2Wins++;
     this.p1Text.setText(String(this.p1Wins));
     this.p2Text.setText(String(this.p2Wins));
+    pulseTween(this, winner === 1 ? this.p1Text : this.p2Text);
 
     const bull = Math.min(e1, e2) < 0.035;
     const who = this.mode === 'ai' ? (winner === 1 ? 'You' : 'CPU') : `P${winner}`;
@@ -165,6 +169,7 @@ export class BullseyeScene extends Phaser.Scene {
       audio.win();
     }
     const color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, GAME_WIDTH / 2, CENTER_Y);
     showResult(this, {
       title,
       titleColor: color,

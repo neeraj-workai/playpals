@@ -1,5 +1,6 @@
 ﻿import Phaser from 'phaser';
-import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { GAME_WIDTH, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -51,7 +52,9 @@ export class TankDuelScene extends Phaser.Scene {
     this.p2Score = 0;
     this.over = false;
     this.shells = [];
-    this.cameras.main.setBackgroundColor(0x3d1f00); // dark orange
+    this.cameras.main.setBackgroundColor(0x3d1f00);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0xb85a00, 0.55).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x1e0e00, 0.55).setOrigin(0.5, 0);
     this.input.addPointer(2);
 
     this.add.line(0, 0, 0, MID_Y, GAME_WIDTH, MID_Y, 0xffffff, 0.08).setOrigin(0).setLineWidth(1);
@@ -128,6 +131,7 @@ export class TankDuelScene extends Phaser.Scene {
     else this.p2Score++;
     this.p1Text.setText(String(this.p1Score));
     this.p2Text.setText(String(this.p2Score));
+    pulseTween(this, owner === 1 ? this.p1Text : this.p2Text);
     audio.goal();
     this.cameras.main.shake(120, 0.008);
     this.tweens.add({ targets: target, alpha: 0.2, duration: 80, yoyo: true, repeat: 2 });
@@ -165,6 +169,7 @@ export class TankDuelScene extends Phaser.Scene {
       audio.win();
     }
     const color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, GAME_WIDTH / 2, 400);
     this.time.delayedCall(400, () =>
       showResult(this, {
         title,

@@ -1,5 +1,6 @@
 ﻿import Phaser from 'phaser';
-import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { GAME_WIDTH, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -49,7 +50,9 @@ export class SumoScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.locked = false;
-    this.cameras.main.setBackgroundColor(0x1c0e4a); // dark purple
+    this.cameras.main.setBackgroundColor(0x1c0e4a);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x5a28c8, 0.55).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x0e0530, 0.55).setOrigin(0.5, 0);
 
     this.add.circle(CX, CY, RING, COLORS.panelLight, 1).setStrokeStyle(5, 0x4b5a7a, 1);
     this.add.circle(CX, CY, RING - 26, 0x000000, 0).setStrokeStyle(2, 0x3a4767, 1);
@@ -131,6 +134,7 @@ export class SumoScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, winner === 1 ? this.p1Text : this.p2Text);
     audio.bump();
     this.cameras.main.shake(160, 0.01);
 
@@ -161,6 +165,7 @@ export class SumoScene extends Phaser.Scene {
       audio.win();
     }
     const color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, CX, CY);
     this.time.delayedCall(400, () =>
       showResult(this, {
         title,

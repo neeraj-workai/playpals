@@ -1,5 +1,6 @@
 ﻿import Phaser from 'phaser';
-import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { GAME_WIDTH, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -60,7 +61,9 @@ export class TrailClashScene extends Phaser.Scene {
     this.p1 = 0;
     this.p2 = 0;
     this.over = false;
-    this.cameras.main.setBackgroundColor(0x0a3d40); // dark teal
+    this.cameras.main.setBackgroundColor(0x0a3d40);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x1a8090, 0.5).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x041e20, 0.5).setOrigin(0.5, 0);
 
     this.add.rectangle(GAME_WIDTH / 2, MID_Y, COLS * CELL + 6, ROWS * CELL + 6, 0x141a26, 1).setStrokeStyle(2, 0x33405e, 1);
 
@@ -70,7 +73,7 @@ export class TrailClashScene extends Phaser.Scene {
     this.add.text(60, 60, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
     this.add.text(340, 60, 'P1', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
 
-    this.status = this.add.text(GAME_WIDTH / 2, MID_Y, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff', align: 'center' }).setOrigin(0.5).setDepth(20);
+    this.status = this.add.text(GAME_WIDTH / 2, MID_Y, '', { ...STATUS_STYLE, fontSize: '20px', align: 'center' }).setOrigin(0.5).setDepth(20);
 
     this.head1 = this.add.rectangle(0, 0, CELL - 2, CELL - 2, COLORS.p1, 1).setStrokeStyle(2, 0xffffff, 0.9).setDepth(5).setVisible(false);
     this.head2 = this.add.rectangle(0, 0, CELL - 2, CELL - 2, COLORS.p2, 1).setStrokeStyle(2, 0xffffff, 0.9).setDepth(5).setVisible(false);
@@ -193,6 +196,7 @@ export class TrailClashScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, winner === 1 ? this.p1Text : this.p2Text);
 
     if (this.p1 >= TARGET || this.p2 >= TARGET) {
       this.time.delayedCall(700, () => this.endMatch());
@@ -215,6 +219,7 @@ export class TrailClashScene extends Phaser.Scene {
       audio.win();
     }
     const color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, GAME_WIDTH / 2, MID_Y);
     showResult(this, {
       title,
       titleColor: color,

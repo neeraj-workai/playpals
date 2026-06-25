@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -46,6 +47,8 @@ export class GravityPongScene extends Phaser.Scene {
     setupSceneScale(this);
     this.p1 = 0; this.p2 = 0; this.over = false;
     this.cameras.main.setBackgroundColor(BG);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x0a4a6a, 0.55).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x020a14, 0.55).setOrigin(0.5, 0);
 
     // Player strips
     this.add.rectangle(GAME_WIDTH / 2, TOP_H / 2, GAME_WIDTH, TOP_H, COLORS.p2, 0.88);
@@ -183,8 +186,8 @@ export class GravityPongScene extends Phaser.Scene {
   }
 
   private score(scorer: number): void {
-    if (scorer === 1) { this.p1++; this.p1ScoreText.setText(String(this.p1)); }
-    else { this.p2++; this.p2ScoreText.setText(String(this.p2)); }
+    if (scorer === 1) { this.p1++; this.p1ScoreText.setText(String(this.p1)); pulseTween(this, this.p1ScoreText); }
+    else { this.p2++; this.p2ScoreText.setText(String(this.p2)); pulseTween(this, this.p2ScoreText); }
     audio.goal();
     this.cameras.main.flash(160, 255, 255, 255);
     if (this.p1 >= SCORE_LIMIT || this.p2 >= SCORE_LIMIT) {
@@ -202,6 +205,7 @@ export class GravityPongScene extends Phaser.Scene {
       ? (p1won ? 'You win!' : 'CPU wins')
       : (p1won ? 'Player 1 wins!' : 'Player 2 wins!');
     p1won ? audio.win() : audio.lose();
+    spawnConfetti(this, GAME_WIDTH / 2, GAME_HEIGHT / 2);
     showResult(this, {
       title,
       subtitle: `${this.p1} – ${this.p2}`,

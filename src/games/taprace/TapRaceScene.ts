@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { spawnConfetti, pulseTween } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -41,12 +42,14 @@ export class TapRaceScene extends Phaser.Scene {
     this.p1 = 0;
     this.p2 = 0;
     this.over = false;
-    this.cameras.main.setBackgroundColor(0x3d2000); // dark orange
+    this.cameras.main.setBackgroundColor(0x7a3800);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0xd4620a, 0.7).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x5c2000, 0.7).setOrigin(0.5, 0);
 
     // top half (P2/CPU)
-    this.add.rectangle(GAME_WIDTH / 2, (70 + MID) / 2, GAME_WIDTH, MID - 70, COLORS.p2, 0.12);
+    this.add.rectangle(GAME_WIDTH / 2, (70 + MID) / 2, GAME_WIDTH, MID - 70, COLORS.p2, 0.14);
     // bottom half (P1)
-    this.add.rectangle(GAME_WIDTH / 2, (MID + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - MID, COLORS.p1, 0.12);
+    this.add.rectangle(GAME_WIDTH / 2, (MID + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - MID, COLORS.p1, 0.14);
     this.add.line(0, 0, 0, MID, GAME_WIDTH, MID, 0xffffff, 0.18).setOrigin(0).setLineWidth(1);
 
     addBackButton(this, () => this.toHub(false));
@@ -93,6 +96,7 @@ export class TapRaceScene extends Phaser.Scene {
     audio.click();
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, side === 1 ? this.p1Text : this.p2Text);
     const p1Track = (GAME_HEIGHT - MID - 80);
     const p2Track = (MID - 110);
     this.p1Bar.height = (this.p1 / TARGET) * p1Track;
@@ -106,12 +110,13 @@ export class TapRaceScene extends Phaser.Scene {
     const p1won = this.p1 >= TARGET;
     let title: string;
     if (this.mode === 'ai') {
-      title = p1won ? 'You win!' : 'CPU wins';
+      title = p1won ? 'You win! 🎉' : 'CPU wins 🤖';
       p1won ? audio.win() : audio.lose();
     } else {
-      title = p1won ? 'Player 1 wins!' : 'Player 2 wins!';
+      title = p1won ? 'Player 1 wins! 🎉' : 'Player 2 wins! 🎉';
       audio.win();
     }
+    spawnConfetti(this, GAME_WIDTH / 2, p1won ? GAME_HEIGHT - 150 : 150);
     this.time.delayedCall(400, () =>
       showResult(this, {
         title,

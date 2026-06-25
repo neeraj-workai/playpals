@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -8,7 +9,7 @@ import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
-const BG = 0x2d0820;
+const BG = 0x5a1040;
 const POOL = ['🍕', '🐶', '🎵', '🌙', '⭐', '🎈', '🍎', '🦋', '🎯', '🍩', '🎸', '🦊'];
 const WIN_ROUNDS = 3;
 const SHOW_MS = 1800;
@@ -40,6 +41,8 @@ export class EmojiQuizScene extends Phaser.Scene {
     setupSceneScale(this);
     this.p1 = 0; this.p2 = 0;
     this.cameras.main.setBackgroundColor(BG);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0xb83070, 0.6).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x3a0828, 0.6).setOrigin(0.5, 0);
 
     // Player strips
     this.add.rectangle(GAME_WIDTH / 2, TOP_H / 2, GAME_WIDTH, TOP_H, COLORS.p2, 0.88);
@@ -54,9 +57,7 @@ export class EmojiQuizScene extends Phaser.Scene {
 
     addBackButton(this, () => this.toHub(false)).setY(GAME_HEIGHT - BOT_H / 2);
 
-    this.statusText = this.add.text(GAME_WIDTH / 2, TOP_H + 18, '', {
-      fontFamily: 'Arial Black, Arial', fontSize: '16px', color: '#ffffffcc', align: 'center',
-    }).setOrigin(0.5, 0).setDepth(5);
+    this.statusText = this.add.text(GAME_WIDTH / 2, TOP_H + 18, '', { ...STATUS_STYLE, fontSize: '16px', align: 'center', color: '#ffffffdd' }).setOrigin(0.5, 0).setDepth(5);
 
     this.seqDisplay = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, '', {
       fontFamily: 'Arial', fontSize: '52px',
@@ -155,8 +156,8 @@ export class EmojiQuizScene extends Phaser.Scene {
 
     if (isCorrect) {
       audio.goal();
-      if (player === 1) { this.p1++; this.p1ScoreText.setText(String(this.p1)); }
-      else { this.p2++; this.p2ScoreText.setText(String(this.p2)); }
+      if (player === 1) { this.p1++; this.p1ScoreText.setText(String(this.p1)); pulseTween(this, this.p1ScoreText); }
+      else { this.p2++; this.p2ScoreText.setText(String(this.p2)); pulseTween(this, this.p2ScoreText); }
       this.cameras.main.flash(200, 60, 200, 60);
     } else {
       audio.bump();
@@ -183,6 +184,7 @@ export class EmojiQuizScene extends Phaser.Scene {
       ? (p1won ? 'You win!' : 'CPU wins')
       : (p1won ? 'Player 1 wins!' : 'Player 2 wins!');
     p1won ? audio.win() : audio.lose();
+    spawnConfetti(this, GAME_WIDTH / 2, GAME_HEIGHT / 2);
     this.time.delayedCall(300, () =>
       showResult(this, {
         title,

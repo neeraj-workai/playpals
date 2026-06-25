@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -72,6 +73,8 @@ export class WordScrambleScene extends Phaser.Scene {
     setupSceneScale(this);
     this.p1 = 0; this.p2 = 0; this.usedWords.clear();
     this.cameras.main.setBackgroundColor(BG);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x1a6a50, 0.55).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x021a10, 0.55).setOrigin(0.5, 0);
 
     // Player strips
     this.add.rectangle(GAME_WIDTH / 2, TOP_H / 2, GAME_WIDTH, TOP_H, COLORS.p2, 0.88);
@@ -91,7 +94,7 @@ export class WordScrambleScene extends Phaser.Scene {
     addBackButton(this, () => this.toHub(false)).setY(GAME_HEIGHT - BOT_H / 2);
 
     this.statusText = this.add.text(GAME_WIDTH / 2, MID_Y, '', {
-      fontFamily: 'Arial Black, Arial', fontSize: '18px', color: '#ffffff', align: 'center',
+      ...STATUS_STYLE, fontSize: '18px', align: 'center',
     }).setOrigin(0.5).setDepth(10);
 
     this.nextRound();
@@ -221,8 +224,8 @@ export class WordScrambleScene extends Phaser.Scene {
     this.aiTimer?.remove(false);
     audio.goal();
     this.cameras.main.flash(200, 60, 200, 60);
-    if (player === 1) { this.p1++; this.p1ScoreText.setText(String(this.p1)); }
-    else { this.p2++; this.p2ScoreText.setText(String(this.p2)); }
+    if (player === 1) { this.p1++; this.p1ScoreText.setText(String(this.p1)); pulseTween(this, this.p1ScoreText); }
+    else { this.p2++; this.p2ScoreText.setText(String(this.p2)); pulseTween(this, this.p2ScoreText); }
     const who = player === 1 ? 'P1' : (this.mode === 'ai' ? 'CPU' : 'P2');
     this.statusText.setText(`${who} solved ${this.word}!`);
     this.time.delayedCall(1400, () => this.nextRound());
@@ -234,12 +237,15 @@ export class WordScrambleScene extends Phaser.Scene {
       ? (p1won ? 'You win!' : 'CPU wins')
       : (p1won ? 'Player 1 wins!' : 'Player 2 wins!');
     p1won ? audio.win() : audio.lose();
-    showResult(this, {
-      title,
-      subtitle: `${this.p1} – ${this.p2}`,
-      onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
-      onHome: () => this.toHub(true),
-    });
+    spawnConfetti(this, GAME_WIDTH / 2, GAME_HEIGHT / 2);
+    this.time.delayedCall(300, () =>
+      showResult(this, {
+        title,
+        subtitle: `${this.p1} – ${this.p2}`,
+        onRematch: () => { void Ads.maybeInterstitial(); this.scene.restart({ mode: this.mode, difficulty: this.difficulty }); },
+        onHome: () => this.toHub(true),
+      })
+    );
   }
 
   private toHub(withAd: boolean): void {

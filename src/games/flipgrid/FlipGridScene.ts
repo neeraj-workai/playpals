@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -8,7 +9,7 @@ import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
-const BG = 0x062210;
+const BG = 0x0a3820;
 const COLS = 4;
 const ROWS = 4;
 const CELL = 74;
@@ -44,6 +45,8 @@ export class FlipGridScene extends Phaser.Scene {
     this.grid = new Array(COLS * ROWS).fill(0);
     this.cells = [];
     this.cameras.main.setBackgroundColor(BG);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x1a8050, 0.5).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x041810, 0.5).setOrigin(0.5, 0);
 
     // Player strips
     this.add.rectangle(GAME_WIDTH / 2, TOP_H / 2, GAME_WIDTH, TOP_H, COLORS.p2, 0.88);
@@ -58,9 +61,7 @@ export class FlipGridScene extends Phaser.Scene {
 
     addBackButton(this, () => this.toHub(false)).setY(GAME_HEIGHT - BOT_H / 2);
 
-    this.turnText = this.add.text(GAME_WIDTH / 2, TOP_H + 14, 'Your turn (P1)', {
-      fontFamily: 'Arial Black, Arial', fontSize: '15px', color: '#ffffff',
-    }).setOrigin(0.5, 0).setDepth(5);
+    this.turnText = this.add.text(GAME_WIDTH / 2, TOP_H + 14, 'Your turn (P1)', { ...STATUS_STYLE, fontSize: '15px' }).setOrigin(0.5, 0).setDepth(5);
 
     this.buildGrid();
     this.updateTurnLabel();
@@ -121,6 +122,7 @@ export class FlipGridScene extends Phaser.Scene {
     this.p2Count = this.grid.filter(v => v === 2).length;
     this.p1ScoreText.setText(String(this.p1Count));
     this.p2ScoreText.setText(String(this.p2Count));
+    if (flipped > 0) pulseTween(this, player === 1 ? this.p1ScoreText : this.p2ScoreText);
 
     // Check game over
     if (this.grid.every(v => v !== 0)) {
@@ -179,6 +181,7 @@ export class FlipGridScene extends Phaser.Scene {
     else if (this.mode === 'ai') { title = p1won ? 'You win!' : 'CPU wins'; }
     else { title = p1won ? 'Player 1 wins!' : 'Player 2 wins!'; }
     p1won ? audio.win() : draw ? audio.goal() : audio.lose();
+    if (!draw) spawnConfetti(this, GAME_WIDTH / 2, GAME_HEIGHT / 2);
     showResult(this, {
       title,
       subtitle: `P1: ${this.p1Count}  –  P2: ${this.p2Count}`,

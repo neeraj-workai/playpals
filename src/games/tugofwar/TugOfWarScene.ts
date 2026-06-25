@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -48,10 +49,12 @@ export class TugOfWarScene extends Phaser.Scene {
     this.knotY = CENTER_Y;
     this.over = false;
     this.locked = true;
-    this.cameras.main.setBackgroundColor(0x3d0a1a); // dark rose
+    this.cameras.main.setBackgroundColor(0x8a1030);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0xd4206a, 0.65).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x5a0818, 0.65).setOrigin(0.5, 0);
 
-    this.add.rectangle(GAME_WIDTH / 2, (64 + CENTER_Y) / 2, GAME_WIDTH, CENTER_Y - 64, COLORS.p2, 0.12);
-    this.add.rectangle(GAME_WIDTH / 2, (CENTER_Y + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - CENTER_Y, COLORS.p1, 0.12);
+    this.add.rectangle(GAME_WIDTH / 2, (64 + CENTER_Y) / 2, GAME_WIDTH, CENTER_Y - 64, COLORS.p2, 0.14);
+    this.add.rectangle(GAME_WIDTH / 2, (CENTER_Y + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - CENTER_Y, COLORS.p1, 0.14);
 
     this.add.line(0, 0, 0, CENTER_Y, GAME_WIDTH, CENTER_Y, 0xffffff, 0.25).setOrigin(0).setLineWidth(1);
     this.add.line(0, 0, 0, CENTER_Y - WIN_DIST, GAME_WIDTH, CENTER_Y - WIN_DIST, COLORS.p2, 0.9).setOrigin(0).setLineWidth(2);
@@ -68,7 +71,7 @@ export class TugOfWarScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH / 2, 66, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '12px', color: COLORS.inkDim }).setOrigin(0.5);
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 58, 'P1', { fontFamily: 'Arial', fontSize: '12px', color: COLORS.inkDim }).setOrigin(0.5);
 
-    this.status = this.add.text(GAME_WIDTH / 2, CENTER_Y - 60, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+    this.status = this.add.text(GAME_WIDTH / 2, CENTER_Y - 60, '', { ...STATUS_STYLE, fontSize: '20px' }).setOrigin(0.5);
 
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
       if (this.over || this.locked || p.worldY < 70) return;
@@ -108,6 +111,7 @@ export class TugOfWarScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, winner === 1 ? this.p1Text : this.p2Text);
     audio.goal();
     this.cameras.main.flash(150, 255, 255, 255);
 
@@ -132,6 +136,7 @@ export class TugOfWarScene extends Phaser.Scene {
       audio.win();
     }
     const color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, GAME_WIDTH / 2, CENTER_Y);
     this.time.delayedCall(400, () =>
       showResult(this, {
         title,

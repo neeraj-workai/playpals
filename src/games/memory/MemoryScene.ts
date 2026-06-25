@@ -7,6 +7,7 @@ import { showResult } from '../../core/ui/ResultOverlay';
 import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 
 const FACES = ['🍎', '🍌', '🍇', '🍒', '🥝', '🍑', '🍓', '🥥', '🌟', '🍉', '🥑', '🫐'];
 const COUNT = 24;
@@ -59,7 +60,9 @@ export class MemoryScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.seen = {};
-    this.cameras.main.setBackgroundColor(0x3d0d20); // dark pink
+    this.cameras.main.setBackgroundColor(0x8e1a4a);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0xc0206a, 0.65).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x5c0a2a, 0.65).setOrigin(0.5, 0);
 
     const deck = Phaser.Utils.Array.Shuffle([...FACES, ...FACES]);
     this.cards = deck.map((value) => ({ value, faceUp: false, matched: false }));
@@ -70,7 +73,7 @@ export class MemoryScene extends Phaser.Scene {
     this.p1Text = this.add.text(340, 40, '0', { fontFamily: 'Arial Black, Arial', fontSize: '26px', color: '#' + COLORS.p1.toString(16) }).setOrigin(0.5);
     this.add.text(60, 60, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
     this.add.text(340, 60, 'P1', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
-    this.turnText = this.add.text(GAME_WIDTH / 2, 150, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+    this.turnText = this.add.text(GAME_WIDTH / 2, 150, '', { ...STATUS_STYLE, fontSize: '20px' }).setOrigin(0.5);
 
     for (let i = 0; i < COUNT; i++) {
       const { x, y } = this.center(i);
@@ -108,7 +111,14 @@ export class MemoryScene extends Phaser.Scene {
 
   private reveal(i: number): void {
     this.cards[i].faceUp = true;
-    this.draw(i);
+    // Flip animation: scale X to 0, switch face, scale back
+    const { rect, label } = this.objs[i];
+    this.tweens.add({
+      targets: rect, scaleX: 0, duration: 80, onComplete: () => {
+        this.draw(i);
+        this.tweens.add({ targets: [rect, label], scaleX: 1, duration: 80 });
+      }
+    });
     audio.click();
     if (Math.random() < AI_MEMORY[this.difficulty]) {
       const arr = (this.seen[this.cards[i].value] ??= []);
@@ -141,6 +151,7 @@ export class MemoryScene extends Phaser.Scene {
       if (this.current === 1) this.p1++;
       else this.p2++;
       this.updateScores();
+      pulseTween(this, this.current === 1 ? this.p1Text : this.p2Text);
       this.matched += 2;
       if (this.matched >= COUNT) {
         this.endMatch();
@@ -243,6 +254,7 @@ export class MemoryScene extends Phaser.Scene {
       audio.win();
     }
     if (draw) audio.bump();
+    if (!draw) this.time.delayedCall(200, () => spawnConfetti(this, GAME_WIDTH / 2, 350));
     this.time.delayedCall(700, () =>
       showResult(this, {
         title,

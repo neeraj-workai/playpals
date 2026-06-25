@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { spawnConfetti, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -46,7 +47,9 @@ export class QuickDrawScene extends Phaser.Scene {
     this.phase = 'intro';
     this.p1 = 0;
     this.p2 = 0;
-    this.cameras.main.setBackgroundColor(0x0a3d22); // dark green
+    this.cameras.main.setBackgroundColor(0x0a5c2a);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x1a8a3a, 0.5).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x062014, 0.5).setOrigin(0.5, 0);
 
     const topLabel = this.mode === 'ai' ? 'CPU' : 'P2';
     this.topPanel = this.add.rectangle(GAME_WIDTH / 2, 188, GAME_WIDTH, 296, NEUTRAL, 1);
@@ -58,7 +61,7 @@ export class QuickDrawScene extends Phaser.Scene {
     this.botScore = this.add.text(GAME_WIDTH / 2, 620, '0', { fontFamily: 'Arial Black, Arial', fontSize: '40px', color: '#ffffff' }).setOrigin(0.5).setDepth(5);
 
     this.status = this.add
-      .text(GAME_WIDTH / 2, 352, '', { fontFamily: 'Arial Black, Arial', fontSize: '22px', color: '#ffffff', align: 'center' })
+      .text(GAME_WIDTH / 2, 352, '', { ...STATUS_STYLE, fontSize: '24px', align: 'center' })
       .setOrigin(0.5)
       .setDepth(10);
 
@@ -88,7 +91,8 @@ export class QuickDrawScene extends Phaser.Scene {
     this.phase = 'go';
     this.greenAt = this.time.now;
     this.setPanels(GREEN);
-    this.status.setText('GO!');
+    this.status.setText('GO! ⚡');
+    this.tweens.add({ targets: this.status, scale: { from: 1.5, to: 1 }, duration: 200, ease: 'Back.easeOut' });
     audio.beep();
     if (this.mode === 'ai') {
       const [lo, hi] = this.difficulty === 'easy' ? [600, 1200] : this.difficulty === 'hard' ? [80, 280] : [260, 680];
@@ -145,6 +149,7 @@ export class QuickDrawScene extends Phaser.Scene {
       audio.win();
     }
     color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, GAME_WIDTH / 2, 350);
 
     showResult(this, {
       title,

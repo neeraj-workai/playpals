@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -41,6 +42,8 @@ export class BombDiffuseScene extends Phaser.Scene {
     setupSceneScale(this);
     this.bombsDefused = 0; this.over = false;
     this.cameras.main.setBackgroundColor(BG);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x8a1010, 0.5).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x0e0202, 0.5).setOrigin(0.5, 0);
 
     // Player strips
     this.add.rectangle(GAME_WIDTH / 2, TOP_H / 2, GAME_WIDTH, TOP_H, COLORS.p2, 0.88);
@@ -64,7 +67,7 @@ export class BombDiffuseScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(5);
 
     this.statusText = this.add.text(GAME_WIDTH / 2, MID_Y - 80, '', {
-      fontFamily: 'Arial Black, Arial', fontSize: '17px', color: '#ffffff', align: 'center',
+      ...STATUS_STYLE, fontSize: '17px', align: 'center',
     }).setOrigin(0.5).setDepth(5);
 
     this.bombsText = this.add.text(GAME_WIDTH / 2, MID_Y + 62, `Bombs defused: 0 / ${TOTAL_BOMBS}`, {
@@ -180,7 +183,8 @@ export class BombDiffuseScene extends Phaser.Scene {
     this.bombText.setText('✅');
     audio.win();
     this.cameras.main.flash(220, 60, 200, 60);
-    this.statusText.setText('DEFUSED!');
+    this.statusText.setText('DEFUSED! ✅');
+    spawnConfetti(this, GAME_WIDTH / 2, MID_Y);
 
     if (this.bombsDefused >= TOTAL_BOMBS) {
       this.over = true;

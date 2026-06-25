@@ -1,5 +1,6 @@
 ﻿import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -48,7 +49,9 @@ export class HotPotatoScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.locked = true;
-    this.cameras.main.setBackgroundColor(0x3d3000); // dark yellow
+    this.cameras.main.setBackgroundColor(0x3d3000);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0xb88a00, 0.55).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 400, 0x1e1800, 0.55).setOrigin(0.5, 0);
 
     this.add.rectangle(GAME_WIDTH / 2, (64 + MID_Y) / 2, GAME_WIDTH, MID_Y - 64, COLORS.p2, 0.12);
     this.add.rectangle(GAME_WIDTH / 2, (MID_Y + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - MID_Y, COLORS.p1, 0.12);
@@ -60,7 +63,7 @@ export class HotPotatoScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH / 2, 66, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '12px', color: COLORS.inkDim }).setOrigin(0.5);
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 58, 'P1', { fontFamily: 'Arial', fontSize: '12px', color: COLORS.inkDim }).setOrigin(0.5);
 
-    this.status = this.add.text(GAME_WIDTH / 2, MID_Y, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5).setDepth(20);
+    this.status = this.add.text(GAME_WIDTH / 2, MID_Y, '', { ...STATUS_STYLE, fontSize: '20px' }).setOrigin(0.5).setDepth(20);
     this.bomb = this.add.text(GAME_WIDTH / 2, BOT_Y, '🧨', { fontSize: '60px' }).setOrigin(0.5).setDepth(10);
 
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
@@ -136,6 +139,7 @@ export class HotPotatoScene extends Phaser.Scene {
     else this.p2++;
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    pulseTween(this, winner === 1 ? this.p1Text : this.p2Text);
 
     audio.bump();
     this.cameras.main.shake(250, 0.018);
@@ -165,6 +169,7 @@ export class HotPotatoScene extends Phaser.Scene {
       audio.win();
     }
     const color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
+    spawnConfetti(this, GAME_WIDTH / 2, GAME_HEIGHT / 2);
     showResult(this, {
       title,
       titleColor: color,

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from '../../core/config';
+import { spawnConfetti, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -8,7 +9,7 @@ import { GameMode, Difficulty } from '../types';
 import { ensureSoleActiveScene } from '../../core/ui/NavGuard';
 import { setupSceneScale } from '../../core/scale';
 
-const BG = 0x1a0840;
+const BG = 0x3a1080;
 const START = 30;
 const WIN_ROUNDS = 2;
 const TOP_H = 68;
@@ -40,6 +41,8 @@ export class CountdownScene extends Phaser.Scene {
     this.over = false;
     this.roundWins = [0, 0];
     this.cameras.main.setBackgroundColor(BG);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x6a2ac8, 0.6).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x1a0840, 0.6).setOrigin(0.5, 0);
 
     // Player strips
     this.add.rectangle(GAME_WIDTH / 2, TOP_H / 2, GAME_WIDTH, TOP_H, COLORS.p2, 0.88);
@@ -66,9 +69,7 @@ export class CountdownScene extends Phaser.Scene {
     this.p2Text = this.add.text(GAME_WIDTH / 2, (TOP_H + MID_Y) / 2, String(START), numStyle).setOrigin(0.5).setAngle(180).setDepth(5);
     this.p1Text = this.add.text(GAME_WIDTH / 2, (MID_Y + GAME_HEIGHT - BOT_H) / 2, String(START), numStyle).setOrigin(0.5).setDepth(5);
 
-    this.statusText = this.add.text(GAME_WIDTH / 2, MID_Y, 'Tap to count down!', {
-      fontFamily: 'Arial Black, Arial', fontSize: '17px', color: '#ffffff',
-    }).setOrigin(0.5).setDepth(10);
+    this.statusText = this.add.text(GAME_WIDTH / 2, MID_Y, 'Tap to count down!', { ...STATUS_STYLE, fontSize: '17px' }).setOrigin(0.5).setDepth(10);
 
     // Tap zones
     const p1Zone = this.add.rectangle(GAME_WIDTH / 2, (MID_Y + GAME_HEIGHT - BOT_H) / 2, GAME_WIDTH, GAME_HEIGHT - BOT_H - MID_Y, 0xffffff, 0.001).setInteractive({ useHandCursor: true });
@@ -149,6 +150,7 @@ export class CountdownScene extends Phaser.Scene {
       ? (p1won ? 'You win!' : 'CPU wins')
       : (p1won ? 'Player 1 wins!' : 'Player 2 wins!');
     p1won ? audio.win() : audio.lose();
+    spawnConfetti(this, GAME_WIDTH / 2, MID_Y);
     showResult(this, {
       title,
       subtitle: `${this.roundWins[0]} – ${this.roundWins[1]} rounds`,

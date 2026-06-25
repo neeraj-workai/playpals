@@ -1,5 +1,6 @@
 ﻿import Phaser from 'phaser';
 import { GAME_WIDTH, COLORS, GAME_ARENA_BG } from '../../core/config';
+import { spawnConfetti, pulseTween, STATUS_STYLE } from '../../core/ui/FxUtils';
 import { Ads } from '../../core/ads/AdManager';
 import { audio } from '../../core/audio/AudioManager';
 import { addBackButton } from '../../core/ui/Hud';
@@ -56,14 +57,16 @@ export class DotsBoxesScene extends Phaser.Scene {
     this.p2 = 0;
     this.over = false;
     this.locked = false;
-    this.cameras.main.setBackgroundColor(0x0f1545); // dark indigo
+    this.cameras.main.setBackgroundColor(0x1a2580);
+    this.add.rectangle(GAME_WIDTH / 2, 0, GAME_WIDTH, 400, 0x3a50d4, 0.6).setOrigin(0.5, 0);
+    this.add.rectangle(GAME_WIDTH / 2, 400, GAME_WIDTH, 300, 0x0d1560, 0.6).setOrigin(0.5, 0);
 
     addBackButton(this, () => this.toHub(false));
     this.p2Text = this.add.text(56, 40, '0', { fontFamily: 'Arial Black, Arial', fontSize: '26px', color: '#' + COLORS.p2.toString(16) }).setOrigin(0.5);
     this.p1Text = this.add.text(344, 40, '0', { fontFamily: 'Arial Black, Arial', fontSize: '26px', color: '#' + COLORS.p1.toString(16) }).setOrigin(0.5);
     this.add.text(56, 60, this.mode === 'ai' ? 'CPU' : 'P2', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
     this.add.text(344, 60, 'P1', { fontFamily: 'Arial', fontSize: '11px', color: COLORS.inkDim }).setOrigin(0.5);
-    this.turnText = this.add.text(GAME_WIDTH / 2, 150, '', { fontFamily: 'Arial Black, Arial', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
+    this.turnText = this.add.text(GAME_WIDTH / 2, 150, '', { ...STATUS_STYLE, fontSize: '20px' }).setOrigin(0.5);
 
     this.boxGfx = this.add.graphics().setDepth(0);
     const guide = this.add.graphics().setDepth(1);
@@ -136,6 +139,7 @@ export class DotsBoxesScene extends Phaser.Scene {
     }
     this.p1Text.setText(String(this.p1));
     this.p2Text.setText(String(this.p2));
+    if (completed > 0) pulseTween(this, player === 1 ? this.p1Text : this.p2Text);
 
     if (this.p1 + this.p2 >= N * N) {
       this.endMatch();
@@ -218,14 +222,15 @@ export class DotsBoxesScene extends Phaser.Scene {
       title = 'Draw';
       audio.bump();
     } else if (this.mode === 'ai') {
-      title = p1won ? 'You win!' : 'CPU wins';
+      title = p1won ? 'You win! 🎉' : 'CPU wins 🤖';
       color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
       p1won ? audio.win() : audio.lose();
     } else {
-      title = p1won ? 'Player 1 wins!' : 'Player 2 wins!';
+      title = p1won ? 'Player 1 wins! 🎉' : 'Player 2 wins! 🎉';
       color = '#' + (p1won ? COLORS.p1 : COLORS.p2).toString(16).padStart(6, '0');
       audio.win();
     }
+    if (!draw) spawnConfetti(this, GAME_WIDTH / 2, 350);
     this.time.delayedCall(600, () =>
       showResult(this, {
         title,
