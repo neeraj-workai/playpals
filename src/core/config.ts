@@ -291,6 +291,28 @@ export const GAMES: GameDef[] = [
     ],
   },
   {
+    key: 'territory', title: 'Territory Duel', blurb: 'Claim the board', scene: 'Territory', icon: '🟪',
+    grad: g(0xc4b5fd, 0x7c3aed), cssGrad: cg('#C4B5FD', '#7C3AED'),
+    tint: '#EDE9FE', tintHex: 0xede9fe, accentHex: 0x7c3aed,
+    time: '2-4 min', diff: 'Hard',
+    howto: [
+      { n: 1, t: 'Tap left / right to steer your block' },
+      { n: 2, t: 'Loop out and back to claim the area inside' },
+      { n: 3, t: "Cut the rival's trail to wipe them out" },
+    ],
+  },
+  {
+    key: 'creatureclash', title: 'Creature Clash', blurb: 'Evolve, then battle', scene: 'CreatureClash', icon: '🐉',
+    grad: g(0xc084fc, 0x7c3aed), cssGrad: cg('#C084FC', '#7C3AED'),
+    tint: '#F0E7FF', tintHex: 0xf0e7ff, accentHex: 0x7c3aed,
+    time: '3 min', diff: 'Medium',
+    howto: [
+      { n: 1, t: 'Feed your egg: 🍖 attack 🛡️ defense 🔮 magic ⚡ speed' },
+      { n: 2, t: 'Spend your food to shape how it evolves' },
+      { n: 3, t: 'Creatures auto-battle — best build wins!' },
+    ],
+  },
+  {
     key: 'flipgrid', title: 'Flip the Grid', blurb: 'Flip to your colour', scene: 'FlipGrid', icon: '🟦',
     grad: g(0x86efac, 0x16a34a), cssGrad: cg('#86EFAC', '#16A34A'),
     tint: '#DCFCE7', tintHex: 0xdcfce7, accentHex: 0x16a34a,

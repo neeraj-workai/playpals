@@ -28,6 +28,8 @@ import { WordScrambleScene } from './games/wordscramble/WordScrambleScene';
 import { GravityPongScene } from './games/gravitypong/GravityPongScene';
 import { FlipGridScene } from './games/flipgrid/FlipGridScene';
 import { HigherLowerScene } from './games/higherlower/HigherLowerScene';
+import { TerritoryDuelScene } from './games/territory/TerritoryDuelScene';
+import { CreatureClashScene } from './games/creatureclash/CreatureClashScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -84,6 +86,8 @@ const config: Phaser.Types.Core.GameConfig = {
     GravityPongScene,
     FlipGridScene,
     HigherLowerScene,
+    TerritoryDuelScene,
+    CreatureClashScene,
   ],
 };
 
